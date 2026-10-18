@@ -3,678 +3,263 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pencil Factory — Professional Tycoon</title>
+  <title>Pencil Factory — Universal Tycoon</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #0f0e0c;
-      --bg-panel: #181512;
-      --bg-card: #221e19;
-      --bg-elevated: #2a251f;
-      --bg-hover: #322c25;
-      --border: #3a332b;
-      --border-light: #4a4238;
-      --text: #f3ebe0;
-      --text-dim: #9a8d7a;
-      --text-muted: #6b5f50;
-      --accent: #e07a3d;
-      --accent-soft: #d4a574;
-      --accent-glow: rgba(224,122,61,0.35);
-      --sage: #6f9b6a;
-      --sage-bright: #9bc892;
-      --teal: #5a8a8a;
-      --cream: #f5e6c8;
-      --rose: #c47b6a;
-      --gold: #d4b483;
-      --purple: #9b7b9b;
-      --blue: #6b8f9e;
+      --bg: #0f0e0c; --bg-panel: #181512; --bg-card: #221e19; --bg-elevated: #2a251f; --bg-hover: #322c25;
+      --border: #3a332b; --border-light: #4a4238; --text: #f3ebe0; --text-dim: #9a8d7a; --text-muted: #6b5f50;
+      --accent: #e07a3d; --accent-soft: #d4a574; --accent-glow: rgba(224,122,61,0.35);
+      --sage: #6f9b6a; --sage-bright: #9bc892; --teal: #5a8a8a; --cream: #f5e6c8; --rose: #c47b6a;
+      --gold: #d4b483; --purple: #9b7b9b; --blue: #6b8f9e; --space: #4a6fa5; --space-bright: #7ba3d4;
       --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-      --radius: 14px;
+      --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace; --radius: 14px;
       --shadow: 0 10px 32px rgba(0,0,0,0.45);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-      line-height: 1.5;
-      background-image:
-        radial-gradient(ellipse at 10% -10%, rgba(224,122,61,0.07) 0%, transparent 45%),
-        radial-gradient(ellipse at 90% 110%, rgba(90,138,138,0.05) 0%, transparent 45%);
+      font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; line-height: 1.5;
+      background-image: radial-gradient(ellipse at 10% -10%, rgba(224,122,61,0.07) 0%, transparent 45%), radial-gradient(ellipse at 90% 110%, rgba(90,138,138,0.05) 0%, transparent 45%);
     }
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 11px 18px;
-      background: linear-gradient(180deg, #1f1b16 0%, #14110e 100%);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      gap: 12px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between; padding: 11px 18px;
+      background: linear-gradient(180deg, #1f1b16 0%, #14110e 100%); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100; gap: 12px; flex-wrap: wrap;
     }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.12rem;
-      color: var(--cream);
-    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.12rem; color: var(--cream); }
     .brand-icon {
-      width: 34px; height: 34px;
-      background: linear-gradient(145deg, var(--accent), var(--accent-soft));
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-size: 1.15rem;
-      box-shadow: 0 0 18px var(--accent-glow);
-      animation: glow 3.5s ease-in-out infinite;
+      width: 34px; height: 34px; background: linear-gradient(145deg, var(--accent), var(--accent-soft));
+      border-radius: 10px; display: grid; place-items: center; font-size: 1.15rem;
+      box-shadow: 0 0 18px var(--accent-glow); animation: glow 3.5s ease-in-out infinite;
     }
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 12px var(--accent-glow); }
-      50% { box-shadow: 0 0 24px rgba(224,122,61,0.5); }
-    }
-    .resources {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .resource {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      min-width: 82px;
-    }
-    .resource-label {
-      font-size: 0.58rem;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-    .resource-value {
-      font-family: var(--mono);
-      font-size: 1.02rem;
-      font-weight: 600;
-      color: var(--accent);
-      transition: transform 0.18s;
-    }
+    @keyframes glow { 0%,100%{box-shadow:0 0 12px var(--accent-glow)} 50%{box-shadow:0 0 24px rgba(224,122,61,0.5)} }
+    .resources { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .resource { display: flex; flex-direction: column; align-items: flex-end; min-width: 82px; }
+    .resource-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); font-weight: 600; }
+    .resource-value { font-family: var(--mono); font-size: 1.02rem; font-weight: 600; color: var(--accent); transition: transform 0.18s; }
     .resource-value.pulse { animation: pop 0.4s ease; }
-    @keyframes pop {
-      0% { transform: scale(1); }
-      35% { transform: scale(1.14); }
-      100% { transform: scale(1); }
-    }
-    .resource-value.pencils { color: var(--gold); }
-    .resource-value.rate { color: var(--sage-bright); }
-    .resource-value.sales { color: var(--sage); }
-    .resource-value.demand { color: var(--teal); }
-    .app {
-      display: grid;
-      grid-template-columns: 178px 1fr;
-      min-height: calc(100vh - 62px);
-    }
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
-      .mobile-tabs { display: flex !important; }
-    }
-    .sidebar {
-      background: var(--bg-panel);
-      border-right: 1px solid var(--border);
-      padding: 12px 7px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+    @keyframes pop { 0%{transform:scale(1)} 35%{transform:scale(1.14)} 100%{transform:scale(1)} }
+    .resource-value.pencils { color: var(--gold); } .resource-value.rate { color: var(--sage-bright); }
+    .resource-value.sales { color: var(--sage); } .resource-value.demand { color: var(--teal); }
+    .resource-value.space { color: var(--space-bright); }
+    .app { display: grid; grid-template-columns: 178px 1fr; min-height: calc(100vh - 62px); }
+    @media (max-width: 900px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .mobile-tabs { display: flex !important; } }
+    .sidebar { background: var(--bg-panel); border-right: 1px solid var(--border); padding: 12px 7px; display: flex; flex-direction: column; gap: 2px; }
     .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 10px;
-      border: none;
-      background: transparent;
-      color: var(--text-dim);
-      font-size: 0.84rem;
-      font-weight: 500;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: all 0.16s;
-      text-align: left;
+      display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: none; background: transparent;
+      color: var(--text-dim); font-size: 0.84rem; font-weight: 500; border-radius: 9px; cursor: pointer; transition: all 0.16s; text-align: left;
     }
     .nav-btn:hover { background: var(--bg-hover); color: var(--text); }
-    .nav-btn.active {
-      background: linear-gradient(90deg, rgba(224,122,61,0.15), transparent);
-      color: var(--accent);
-      border-left: 3px solid var(--accent);
-    }
+    .nav-btn.active { background: linear-gradient(90deg, rgba(224,122,61,0.15), transparent); color: var(--accent); border-left: 3px solid var(--accent); }
+    .nav-btn.locked { opacity: 0.4; cursor: not-allowed; }
     .nav-btn .icon { font-size: 1rem; width: 18px; text-align: center; }
-    .mobile-tabs {
-      display: none;
-      background: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-      padding: 6px;
-      gap: 3px;
-    }
+    .mobile-tabs { display: none; background: var(--bg-panel); border-bottom: 1px solid var(--border); overflow-x: auto; padding: 6px; gap: 3px; }
     .mobile-tabs .nav-btn { flex-shrink: 0; padding: 7px 10px; font-size: 0.78rem; }
-    .main {
-      padding: 16px;
-      overflow-y: auto;
-      max-height: calc(100vh - 62px);
-    }
-    .panel { display: none; animation: fade 0.25s ease; }
-    .panel.active { display: block; }
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: none; }
-    }
-    h2 {
-      font-size: 1.28rem;
-      font-weight: 700;
-      color: var(--cream);
-      margin-bottom: 2px;
-    }
-    .subtitle {
-      color: var(--text-dim);
-      font-size: 0.84rem;
-      margin-bottom: 14px;
-    }
+    .main { padding: 16px; overflow-y: auto; max-height: calc(100vh - 62px); }
+    .panel { display: none; animation: fade 0.25s ease; } .panel.active { display: block; }
+    @keyframes fade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    h2 { font-size: 1.28rem; font-weight: 700; color: var(--cream); margin-bottom: 2px; }
+    .subtitle { color: var(--text-dim); font-size: 0.84rem; margin-bottom: 14px; }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
-      transition: border-color 0.18s;
-    }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); transition: border-color 0.18s; }
     .card:hover { border-color: var(--border-light); }
-    .card h3 {
-      font-size: 0.9rem;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--cream);
-      font-weight: 600;
-    }
+    .card h3 { font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; color: var(--cream); font-weight: 600; }
     .produce-zone {
-      text-align: center;
-      padding: 20px 12px 16px;
-      background: linear-gradient(165deg, #261f19 0%, #1a1612 100%);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      margin-bottom: 12px;
-      position: relative;
-      overflow: hidden;
+      text-align: center; padding: 20px 12px 16px; background: linear-gradient(165deg, #261f19 0%, #1a1612 100%);
+      border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 12px; position: relative; overflow: hidden;
     }
-    .produce-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 8%, rgba(224,122,61,0.1), transparent 55%);
-      pointer-events: none;
-    }
+    .produce-zone::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 8%, rgba(224,122,61,0.1), transparent 55%); pointer-events: none; }
     .produce-btn {
-      width: 108px; height: 108px;
-      border-radius: 50%;
-      border: 3px solid var(--accent);
-      background: linear-gradient(145deg, #322c25, #1f1b16);
-      color: var(--accent);
-      font-size: 2.2rem;
-      cursor: pointer;
-      transition: all 0.12s;
-      position: relative;
-      z-index: 1;
+      width: 108px; height: 108px; border-radius: 50%; border: 3px solid var(--accent);
+      background: linear-gradient(145deg, #322c25, #1f1b16); color: var(--accent); font-size: 2.2rem; cursor: pointer; transition: all 0.12s; position: relative; z-index: 1;
     }
-    .produce-btn:hover {
-      transform: scale(1.07);
-      box-shadow: 0 0 28px var(--accent-glow);
-    }
+    .produce-btn:hover { transform: scale(1.07); box-shadow: 0 0 28px var(--accent-glow); }
     .produce-btn:active { transform: scale(0.92); }
     .produce-btn.working { animation: click 0.3s ease; }
-    @keyframes click {
-      0% { transform: scale(1); }
-      40% { transform: scale(0.9) rotate(-6deg); }
-      100% { transform: scale(1); }
-    }
-    .produce-info {
-      margin-top: 10px;
-      font-family: var(--mono);
-      color: var(--text-dim);
-      font-size: 0.8rem;
-    }
+    @keyframes click { 0%{transform:scale(1)} 40%{transform:scale(0.9) rotate(-6deg)} 100%{transform:scale(1)} }
+    .produce-info { margin-top: 10px; font-family: var(--mono); color: var(--text-dim); font-size: 0.8rem; }
     .produce-info strong { color: var(--accent); }
-    .pricing-panel {
-      background: var(--bg);
-      border-radius: 11px;
-      padding: 12px;
-      margin-top: 12px;
-      border: 1px solid var(--border);
-    }
-    .pricing-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .price-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .price-input-wrap label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-    }
+    .pricing-panel { background: var(--bg); border-radius: 11px; padding: 12px; margin-top: 12px; border: 1px solid var(--border); }
+    .pricing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+    .price-input-wrap { display: flex; align-items: center; gap: 6px; }
+    .price-input-wrap label { font-size: 0.8rem; color: var(--text-dim); }
     .price-input {
-      width: 80px;
-      padding: 6px 8px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      color: var(--cream);
-      font-family: var(--mono);
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-align: right;
+      width: 80px; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--cream); font-family: var(--mono); font-size: 0.95rem; font-weight: 600; text-align: right;
     }
     .price-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
     .demand-meter { margin-top: 6px; }
-    .demand-bar-bg {
-      height: 12px;
-      background: var(--bg-card);
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .demand-bar-fill {
-      height: 100%;
-      border-radius: 6px;
-      transition: width 0.4s cubic-bezier(0.22,1,0.36,1), background 0.35s;
-      background: linear-gradient(90deg, var(--rose), var(--accent), var(--sage));
-    }
-    .demand-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-    .demand-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-      gap: 6px;
-      margin-top: 10px;
-    }
-    .demand-stat {
-      background: var(--bg-card);
-      padding: 8px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    .demand-stat .lbl {
-      font-size: 0.62rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-    .demand-stat .val {
-      font-family: var(--mono);
-      font-size: 0.92rem;
-      font-weight: 600;
-      margin-top: 2px;
-    }
+    .demand-bar-bg { height: 12px; background: var(--bg-card); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+    .demand-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s cubic-bezier(0.22,1,0.36,1), background 0.35s; background: linear-gradient(90deg, var(--rose), var(--accent), var(--sage)); }
+    .demand-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted); margin-top: 3px; }
+    .demand-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 6px; margin-top: 10px; }
+    .demand-stat { background: var(--bg-card); padding: 8px; border-radius: 8px; text-align: center; }
+    .demand-stat .lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+    .demand-stat .val { font-family: var(--mono); font-size: 0.92rem; font-weight: 600; margin-top: 2px; }
     .live-sales {
-      margin-top: 8px;
-      padding: 8px 10px;
-      background: rgba(111,155,106,0.1);
-      border-radius: 8px;
-      font-size: 0.8rem;
-      color: var(--sage-bright);
-      font-family: var(--mono);
-      min-height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.25s;
+      margin-top: 8px; padding: 8px 10px; background: rgba(111,155,106,0.1); border-radius: 8px; font-size: 0.8rem;
+      color: var(--sage-bright); font-family: var(--mono); min-height: 32px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.25s;
     }
-    .live-sales.flash {
-      background: rgba(111,155,106,0.22);
-      animation: flash 0.45s ease;
-    }
-    @keyframes flash {
-      0% { transform: scale(1); }
-      40% { transform: scale(1.02); }
-      100% { transform: scale(1); }
-    }
+    .live-sales.flash { background: rgba(111,155,106,0.22); animation: flash 0.45s ease; }
+    @keyframes flash { 0%{transform:scale(1)} 40%{transform:scale(1.02)} 100%{transform:scale(1)} }
     .machine { display: flex; flex-direction: column; gap: 5px; }
     .machine-top { display: flex; justify-content: space-between; align-items: center; }
     .machine-name { font-weight: 600; font-size: 0.88rem; }
-    .machine-level {
-      background: var(--bg);
-      padding: 2px 7px;
-      border-radius: 12px;
-      font-size: 0.68rem;
-      font-family: var(--mono);
-      color: var(--gold);
-    }
+    .machine-level { background: var(--bg); padding: 2px 7px; border-radius: 12px; font-size: 0.68rem; font-family: var(--mono); color: var(--gold); }
     .machine-stats { font-size: 0.74rem; color: var(--text-dim); display: flex; gap: 8px; }
     .machine-bar { height: 4px; background: var(--bg); border-radius: 3px; overflow: hidden; }
-    .machine-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--teal), var(--sage));
-      border-radius: 3px;
-      transition: width 0.3s;
-    }
-    .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--sage);
-      display: inline-block;
-      margin-right: 4px;
-      opacity: 0.25;
-    }
-    .dot.on {
-      opacity: 1;
-      box-shadow: 0 0 6px var(--sage);
-      animation: blink 1.1s infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
+    .machine-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--sage)); border-radius: 3px; transition: width 0.3s; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); display: inline-block; margin-right: 4px; opacity: 0.25; }
+    .dot.on { opacity: 1; box-shadow: 0 0 6px var(--sage); animation: blink 1.1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
     .buy-btn {
-      margin-top: 4px;
-      padding: 7px 10px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(180deg, var(--accent), #b85c2a);
-      color: #1a120c;
-      font-weight: 700;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.14s;
-      width: 100%;
+      margin-top: 4px; padding: 7px 10px; border: none; border-radius: 8px; background: linear-gradient(180deg, var(--accent), #b85c2a);
+      color: #1a120c; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.14s; width: 100%;
     }
     .buy-btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
-    .buy-btn:disabled {
-      background: var(--bg-hover);
-      color: var(--text-muted);
-      cursor: not-allowed;
-      opacity: 0.65;
-    }
-    .upgrade {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 10px;
-      background: var(--bg);
-      border-radius: 10px;
-      border: 1px solid transparent;
-      transition: all 0.15s;
-    }
+    .buy-btn:disabled { background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed; opacity: 0.65; }
+    .upgrade { display: flex; gap: 10px; align-items: flex-start; padding: 10px; background: var(--bg); border-radius: 10px; border: 1px solid transparent; transition: all 0.15s; }
     .upgrade:hover { border-color: var(--border); background: #1a1612; }
-    .upgrade-icon {
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      background: var(--bg-card);
-      display: grid;
-      place-items: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
+    .upgrade-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--bg-card); display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0; }
     .upgrade-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 1px; }
     .upgrade-desc { font-size: 0.74rem; color: var(--text-dim); margin-bottom: 3px; }
     .upgrade-effect { font-size: 0.7rem; color: var(--sage-bright); font-family: var(--mono); }
-    .mkt-card {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 11px;
-      border: 1px solid var(--border);
-      margin-bottom: 7px;
-      transition: border-color 0.15s;
-    }
+    .mkt-card { background: var(--bg); border-radius: 10px; padding: 11px; border: 1px solid var(--border); margin-bottom: 7px; transition: border-color 0.15s; }
     .mkt-card:hover { border-color: var(--border-light); }
     .mkt-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
     .mkt-desc { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 6px; }
     .mkt-level { font-family: var(--mono); font-size: 0.74rem; color: var(--gold); }
     .stock-row {
-      display: grid;
-      grid-template-columns: 1fr 72px 72px 52px 82px;
-      gap: 6px;
-      align-items: center;
-      padding: 8px 10px;
-      background: var(--bg);
-      border-radius: 8px;
-      margin-bottom: 5px;
-      font-size: 0.82rem;
+      display: grid; grid-template-columns: 1fr 72px 72px 52px 82px; gap: 6px; align-items: center;
+      padding: 8px 10px; background: var(--bg); border-radius: 8px; margin-bottom: 5px; font-size: 0.82rem;
     }
     .stock-row:hover { background: #1c1814; }
-    @media (max-width: 680px) {
-      .stock-row { grid-template-columns: 1fr 1fr; gap: 4px; }
-    }
-    .stock-name { font-weight: 600; }
-    .stock-ticker { font-size: 0.66rem; color: var(--text-muted); font-family: var(--mono); }
+    @media (max-width: 680px) { .stock-row { grid-template-columns: 1fr 1fr; gap: 4px; } }
+    .stock-name { font-weight: 600; } .stock-ticker { font-size: 0.66rem; color: var(--text-muted); font-family: var(--mono); }
     .stock-price { font-family: var(--mono); font-weight: 600; }
-    .stock-change.up { color: var(--sage-bright); }
-    .stock-change.down { color: var(--rose); }
+    .stock-change.up { color: var(--sage-bright); } .stock-change.down { color: var(--rose); }
     .stock-shares { font-family: var(--mono); color: var(--text-dim); }
     .stock-actions { display: flex; gap: 4px; }
-    .stock-actions button {
-      padding: 3px 7px;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.68rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-buy { background: var(--sage); color: #1a1a12; }
-    .btn-sell { background: var(--rose); color: #1a120c; }
+    .stock-actions button { padding: 3px 7px; border: none; border-radius: 5px; font-size: 0.68rem; font-weight: 600; cursor: pointer; }
+    .btn-buy { background: var(--sage); color: #1a1a12; } .btn-sell { background: var(--rose); color: #1a120c; }
     .chart-container { position: relative; height: 180px; }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .stat-box {
-      background: var(--bg);
-      padding: 9px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    .stat-box .label {
-      font-size: 0.62rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-    .stat-box .value {
-      font-family: var(--mono);
-      font-size: 1rem;
-      font-weight: 600;
-    }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .stat-box { background: var(--bg); padding: 9px; border-radius: 8px; text-align: center; }
+    .stat-box .label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 2px; }
+    .stat-box .value { font-family: var(--mono); font-size: 1rem; font-weight: 600; }
     .toast {
-      position: fixed;
-      bottom: 18px;
-      right: 18px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 10px;
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: all 0.26s cubic-bezier(0.22,1,0.36,1);
-      max-width: 280px;
-      font-size: 0.84rem;
+      position: fixed; bottom: 18px; right: 18px; background: var(--bg-card); border: 1px solid var(--border);
+      padding: 10px 14px; border-radius: 10px; box-shadow: var(--shadow); z-index: 1000; opacity: 0;
+      transform: translateY(12px); transition: all 0.26s cubic-bezier(0.22,1,0.36,1); max-width: 280px; font-size: 0.84rem;
     }
     .toast.show { opacity: 1; transform: none; }
     .float-money {
-      position: fixed;
-      pointer-events: none;
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--sage-bright);
-      z-index: 999;
-      animation: floatUp 1.1s ease-out forwards;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      position: fixed; pointer-events: none; font-family: var(--mono); font-weight: 700; font-size: 0.92rem;
+      color: var(--sage-bright); z-index: 999; animation: floatUp 1.1s ease-out forwards; text-shadow: 0 1px 4px rgba(0,0,0,0.5);
     }
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-52px) scale(0.9); }
-    }
+    @keyframes floatUp { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-52px) scale(0.9)} }
     .actions-bar { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
     .secondary-btn {
-      padding: 6px 12px;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      color: var(--text);
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 500;
-      transition: background 0.14s;
+      padding: 6px 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);
+      border-radius: 7px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: background 0.14s;
     }
     .secondary-btn:hover { background: var(--bg-hover); }
-    .quality-badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 5px;
-      font-size: 0.68rem;
-      font-weight: 600;
-      background: rgba(224,122,61,0.14);
-      color: var(--accent);
-    }
-    .event-log {
-      max-height: 120px;
-      overflow-y: auto;
-      font-size: 0.74rem;
-      color: var(--text-dim);
-    }
+    .quality-badge { display: inline-block; padding: 2px 6px; border-radius: 5px; font-size: 0.68rem; font-weight: 600; background: rgba(224,122,61,0.14); color: var(--accent); }
+    .event-log { max-height: 120px; overflow-y: auto; font-size: 0.74rem; color: var(--text-dim); }
     .event-log div { padding: 2px 0; border-bottom: 1px solid rgba(58,51,43,0.5); }
     .event-log .time { color: var(--teal); font-family: var(--mono); margin-right: 5px; }
     .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; }
     .prestige-box {
-      background: linear-gradient(135deg, rgba(155,123,155,0.1), rgba(90,138,138,0.06));
-      border: 1px solid var(--purple);
-      border-radius: var(--radius);
-      padding: 16px;
-      text-align: center;
-      margin-top: 14px;
+      background: linear-gradient(135deg, rgba(155,123,155,0.1), rgba(90,138,138,0.06)); border: 1px solid var(--purple);
+      border-radius: var(--radius); padding: 16px; text-align: center; margin-top: 14px;
     }
-    .material-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(58,51,43,0.4);
-    }
+    .material-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(58,51,43,0.4); }
     .material-row:last-child { border-bottom: none; }
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 5px;
-      border-radius: 3px;
-      background: var(--bg-card);
-      outline: none;
-      margin: 5px 0;
-    }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      box-shadow: 0 0 6px var(--accent-glow);
-    }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--bg-card); outline: none; margin: 5px 0; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px var(--accent-glow); }
     .clearance-btn {
-      padding: 6px 12px;
-      border: 1px solid var(--rose);
-      background: transparent;
-      color: var(--rose);
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-top: 6px;
-      transition: all 0.14s;
+      padding: 6px 12px; border: 1px solid var(--rose); background: transparent; color: var(--rose);
+      border-radius: 7px; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-top: 6px; transition: all 0.14s;
     }
     .clearance-btn:hover { background: rgba(196,123,106,0.12); }
-    .clearance-btn.active {
-      background: var(--rose);
-      color: #1a120c;
-    }
+    .clearance-btn.active { background: var(--rose); color: #1a120c; }
     .banner {
-      background: linear-gradient(90deg, rgba(224,122,61,0.12), rgba(90,138,138,0.07));
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 8px 12px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.84rem;
+      background: linear-gradient(90deg, rgba(224,122,61,0.12), rgba(90,138,138,0.07)); border: 1px solid var(--border);
+      border-radius: 9px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.84rem;
     }
     .banner strong { color: var(--accent); }
-    .progress-track {
-      height: 6px;
-      background: var(--bg);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 8px;
+    .progress-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--sage)); border-radius: 3px; transition: width 0.3s; }
+
+    /* Space / Mission Control */
+    .space-banner {
+      background: linear-gradient(90deg, rgba(74,111,165,0.18), rgba(155,123,155,0.1));
+      border: 1px solid var(--space); border-radius: 9px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.86rem;
     }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--teal), var(--sage));
-      border-radius: 3px;
-      transition: width 0.3s;
+    .mission-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 8px;
+      transition: border-color 0.15s;
     }
+    .mission-card:hover { border-color: var(--space); }
+    .mission-card.locked { opacity: 0.5; }
+    .mission-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 2px; display: flex; justify-content: space-between; }
+    .mission-desc { font-size: 0.74rem; color: var(--text-dim); margin-bottom: 6px; }
+    .mission-stats { font-family: var(--mono); font-size: 0.72rem; color: var(--space-bright); margin-bottom: 6px; }
+    .colony-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 8px;
+    }
+    .colony-name { font-weight: 600; font-size: 0.9rem; }
+    .colony-pct { font-family: var(--mono); color: var(--gold); font-size: 0.8rem; }
+    .colony-bar { height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden; margin: 6px 0; }
+    .colony-bar-fill { height: 100%; background: linear-gradient(90deg, var(--space), var(--purple)); border-radius: 4px; transition: width 0.4s; }
+
+    /* Overlays / Minigames */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(8,7,6,0.82); z-index: 2000; display: none;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .overlay.show { display: flex; }
+    .overlay-box {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px;
+      padding: 20px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .overlay-box h3 { color: var(--cream); margin-bottom: 8px; font-size: 1.1rem; }
+    .overlay-box p { font-size: 0.84rem; color: var(--text-dim); margin-bottom: 12px; }
+    .thermal-bar-bg { height: 18px; background: var(--bg); border-radius: 9px; overflow: hidden; border: 1px solid var(--border); margin: 10px 0; }
+    .thermal-bar-fill { height: 100%; border-radius: 9px; transition: width 0.1s, background 0.2s; background: linear-gradient(90deg, var(--sage), var(--accent), var(--rose)); }
+    .cool-btn {
+      width: 100%; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(180deg, var(--space-bright), var(--space));
+      color: #0a0e14; font-weight: 700; font-size: 1.05rem; cursor: pointer; margin-top: 8px;
+    }
+    .cool-btn:active { transform: scale(0.97); }
+    .formula-input {
+      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg);
+      color: var(--cream); font-family: var(--mono); font-size: 1rem; margin: 8px 0;
+    }
+    .formula-input:focus { outline: none; border-color: var(--space); }
+    .telemetry {
+      font-family: var(--mono); font-size: 0.72rem; color: var(--space-bright); background: #0a0e14;
+      padding: 8px 10px; border-radius: 6px; margin: 8px 0; max-height: 90px; overflow-y: auto;
+    }
+    .success-banner { background: rgba(111,155,106,0.15); border-color: var(--sage); }
+    .fail-banner { background: rgba(196,123,106,0.15); border-color: var(--rose); }
+    .locked-hint { font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
   </style>
 </head>
 <body>
   <div class="topbar">
     <div class="brand">
       <div class="brand-icon">✏️</div>
-      <span>Pencil Factory</span>
+      <span id="brand-name">Pencil Factory</span>
     </div>
     <div class="resources">
-      <div class="resource">
-        <span class="resource-label">Cash</span>
-        <span class="resource-value" id="cash-display">$45.00</span>
-      </div>
-      <div class="resource">
-        <span class="resource-label">Inventory</span>
-        <span class="resource-value pencils" id="pencils-display">0</span>
-      </div>
-      <div class="resource">
-        <span class="resource-label">Making</span>
-        <span class="resource-value rate" id="rate-display">0.0/s</span>
-      </div>
-      <div class="resource">
-        <span class="resource-label">Selling</span>
-        <span class="resource-value sales" id="sales-display">0.0/s</span>
-      </div>
-      <div class="resource">
-        <span class="resource-label">Demand</span>
-        <span class="resource-value demand" id="demand-display">55%</span>
-      </div>
+      <div class="resource"><span class="resource-label">Cash</span><span class="resource-value" id="cash-display">$45.00</span></div>
+      <div class="resource"><span class="resource-label">Inventory</span><span class="resource-value pencils" id="pencils-display">0</span></div>
+      <div class="resource"><span class="resource-label">Making</span><span class="resource-value rate" id="rate-display">0.0/s</span></div>
+      <div class="resource"><span class="resource-label">Selling</span><span class="resource-value sales" id="sales-display">0.0/s</span></div>
+      <div class="resource"><span class="resource-label">Demand</span><span class="resource-value demand" id="demand-display">55%</span></div>
+      <div class="resource" id="space-res" style="display:none"><span class="resource-label">Space Prod</span><span class="resource-value space" id="space-prod-display">0/s</span></div>
     </div>
   </div>
   <div class="mobile-tabs" id="mobile-tabs"></div>
@@ -687,43 +272,28 @@
       <button class="nav-btn" data-panel="supply"><span class="icon">📦</span> Supply</button>
       <button class="nav-btn" data-panel="market"><span class="icon">📈</span> Stocks</button>
       <button class="nav-btn" data-panel="analytics"><span class="icon">📊</span> Analytics</button>
+      <button class="nav-btn locked" data-panel="mission" id="nav-mission"><span class="icon">🚀</span> Mission Control</button>
+      <button class="nav-btn locked" data-panel="cosmos" id="nav-cosmos"><span class="icon">🌌</span> Cosmos</button>
       <button class="nav-btn" data-panel="office"><span class="icon">🏢</span> Office</button>
     </aside>
     <main class="main">
+      <!-- PRODUCTION -->
       <div class="panel active" id="panel-production">
         <h2>Production Floor</h2>
         <p class="subtitle">Make pencils → set a fair price → customers buy what you have in stock.</p>
-        <div class="banner">
-          <span>🍂</span>
-          <div><strong>Tip:</strong> Click the pencil (or Space). Keep price near Fair Value. Buy Local Ads early.</div>
-        </div>
+        <div class="banner" id="tip-banner"><span>🍂</span><div><strong>Tip:</strong> Click the pencil (or Space). Keep price near Fair Value. Buy Local Ads early.</div></div>
         <div class="produce-zone">
           <button class="produce-btn" id="produce-btn" title="Spacebar to produce">✏️</button>
-          <div class="produce-info">
-            Click: <strong id="click-power">1</strong>
-            &nbsp;•&nbsp; <span class="quality-badge" id="quality-badge">Standard HB</span>
-            &nbsp;•&nbsp; Cost: $<span id="unit-cost">0.08</span>
-          </div>
+          <div class="produce-info">Click: <strong id="click-power">1</strong> &nbsp;•&nbsp; <span class="quality-badge" id="quality-badge">Standard HB</span> &nbsp;•&nbsp; Cost: $<span id="unit-cost">0.08</span></div>
           <div class="pricing-panel">
             <div class="pricing-header">
-              <div class="price-input-wrap">
-                <label>Price $</label>
-                <input type="number" class="price-input" id="asking-price" min="0.10" max="40" step="0.05" value="0.95">
-              </div>
-              <div style="font-size:0.8rem; color:var(--text-dim);">
-                Fair ≈ <strong id="perceived-value" style="color:var(--gold);">$0.90</strong>
-              </div>
+              <div class="price-input-wrap"><label>Price $</label><input type="number" class="price-input" id="asking-price" min="0.10" max="40" step="0.05" value="0.95"></div>
+              <div style="font-size:0.8rem;color:var(--text-dim)">Fair ≈ <strong id="perceived-value" style="color:var(--gold)">$0.90</strong></div>
             </div>
             <input type="range" id="price-slider" min="10" max="2000" value="95" step="5">
             <div class="demand-meter">
-              <div class="demand-bar-bg">
-                <div class="demand-bar-fill" id="demand-bar" style="width:40%"></div>
-              </div>
-              <div class="demand-labels">
-                <span>Low</span>
-                <span id="demand-pct-label">55% Demand</span>
-                <span>High</span>
-              </div>
+              <div class="demand-bar-bg"><div class="demand-bar-fill" id="demand-bar" style="width:40%"></div></div>
+              <div class="demand-labels"><span>Low</span><span id="demand-pct-label">55% Demand</span><span>High</span></div>
             </div>
             <div class="demand-stats">
               <div class="demand-stat"><div class="lbl">Sales Rate</div><div class="val" id="sales-rate">0.0 /s</div></div>
@@ -737,81 +307,87 @@
           </div>
         </div>
         <div class="grid-2">
-          <div class="card">
-            <h3>📋 Status</h3>
-            <div class="stat-grid" style="margin:0;">
+          <div class="card"><h3>📋 Status</h3>
+            <div class="stat-grid" style="margin:0">
               <div class="stat-box"><div class="label">Inventory</div><div class="value" id="inv-stat">0</div></div>
               <div class="stat-box"><div class="label">Making</div><div class="value" id="auto-stat">0/s</div></div>
               <div class="stat-box"><div class="label">Total Made</div><div class="value" id="total-made-stat">0</div></div>
               <div class="stat-box"><div class="label">Lifetime $</div><div class="value" id="lifetime-sales">$0</div></div>
             </div>
           </div>
-          <div class="card">
-            <h3>📰 Log</h3>
-            <div class="event-log" id="event-log"></div>
-          </div>
+          <div class="card"><h3>📰 Log</h3><div class="event-log" id="event-log"></div></div>
         </div>
       </div>
+
+      <!-- MACHINES -->
       <div class="panel" id="panel-machines">
         <h2>Machines</h2>
         <p class="subtitle">Automate production. They only run when materials are available.</p>
         <div class="grid-3" id="machines-grid"></div>
       </div>
+
+      <!-- UPGRADES -->
       <div class="panel" id="panel-upgrades">
         <h2>R&amp;D Lab</h2>
         <p class="subtitle">Quality, speed, brand and efficiency upgrades.</p>
         <div class="grid-2" id="upgrades-grid"></div>
       </div>
+
+      <!-- MARKETING -->
       <div class="panel" id="panel-marketing">
         <h2>Marketing &amp; Brand</h2>
         <p class="subtitle">This is how you grow demand. Start with Local Ads ($28).</p>
         <div class="grid-2">
-          <div class="card">
-            <h3>📣 Campaigns</h3>
-            <div id="marketing-list"></div>
-          </div>
-          <div class="card">
-            <h3>📈 Boost Summary</h3>
+          <div class="card"><h3>📣 Campaigns</h3><div id="marketing-list"></div></div>
+          <div class="card"><h3>📈 Boost Summary</h3>
             <div class="material-row"><span>Total Marketing Lv</span><span style="font-family:var(--mono)" id="mkt-total-level">0</span></div>
-            <div class="material-row"><span>Current Demand</span><span style="font-family:var(--mono); color:var(--sage-bright)" id="mkt-demand-boost">55%</span></div>
-            <div class="material-row"><span>Brand Strength</span><span style="font-family:var(--mono); color:var(--gold)" id="mkt-brand">1.00</span></div>
-            <div class="material-row"><span>Logo Level</span><span style="font-family:var(--mono); color:var(--teal)" id="mkt-logo">0</span></div>
-            <p class="hint" style="margin-top:10px;">Local Ads are cheap and effective early. Logo + Catalog let you charge more later.</p>
+            <div class="material-row"><span>Current Demand</span><span style="font-family:var(--mono);color:var(--sage-bright)" id="mkt-demand-boost">55%</span></div>
+            <div class="material-row"><span>Brand Strength</span><span style="font-family:var(--mono);color:var(--gold)" id="mkt-brand">1.00</span></div>
+            <div class="material-row"><span>Logo Level</span><span style="font-family:var(--mono);color:var(--teal)" id="mkt-logo">0</span></div>
+            <p class="hint" style="margin-top:10px">Local Ads are cheap and effective early. Logo + Catalog let you charge more later.</p>
           </div>
         </div>
       </div>
+
+      <!-- SUPPLY -->
       <div class="panel" id="panel-supply">
         <h2>Supply Chain</h2>
         <p class="subtitle">Materials keep machines running. Low stock slows everything.</p>
         <div class="grid-2">
-          <div class="card">
-            <h3>🪵 Materials</h3>
+          <div class="card"><h3>🪵 Materials</h3>
             <div id="materials-list"></div>
             <div class="actions-bar">
               <button class="secondary-btn" id="buy-materials-btn">Restock ($15 → +400)</button>
               <button class="secondary-btn" id="buy-bulk-btn">Bulk ($80 → +2200)</button>
             </div>
           </div>
-          <div class="card">
-            <h3>📦 Warehouse</h3>
+          <div class="card"><h3>📦 Warehouse</h3>
             <div class="material-row"><span>Capacity</span><span style="font-family:var(--mono)" id="wh-cap">3,000</span></div>
-            <div class="material-row"><span>Stock</span><span style="font-family:var(--mono); color:var(--gold)" id="wh-stock">0</span></div>
+            <div class="material-row"><span>Stock</span><span style="font-family:var(--mono);color:var(--gold)" id="wh-stock">0</span></div>
             <div class="material-row"><span>Fill</span><span style="font-family:var(--mono)" id="wh-fill">0%</span></div>
             <div class="progress-track"><div class="progress-fill" id="wh-bar" style="width:0%"></div></div>
           </div>
         </div>
       </div>
+
+      <!-- STOCKS -->
       <div class="panel" id="panel-market">
         <h2>Stock Market</h2>
-        <p class="subtitle">Invest spare cash. Some stocks react to your factory size.</p>
-        <div class="card" style="margin-bottom:10px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0;">Portfolio</h3>
-            <span style="font-family:var(--mono); color:var(--purple); font-size:1.05rem;" id="portfolio-detail">$0.00</span>
+        <p class="subtitle">Invest spare cash. Aerospace stocks react strongly to your missions.</p>
+        <div class="card" style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="margin:0">Portfolio</h3>
+            <span style="font-family:var(--mono);color:var(--purple);font-size:1.05rem" id="portfolio-detail">$0.00</span>
           </div>
         </div>
         <div id="stocks-list"></div>
+        <div class="card" style="margin-top:12px">
+          <h3>Aerospace Index</h3>
+          <div class="chart-container"><canvas id="aero-chart"></canvas></div>
+        </div>
       </div>
+
+      <!-- ANALYTICS -->
       <div class="panel" id="panel-analytics">
         <h2>Factory Analytics</h2>
         <p class="subtitle">Live numbers and trends.</p>
@@ -829,112 +405,220 @@
           <div class="card"><h3>Production</h3><div class="chart-container"><canvas id="prod-chart"></canvas></div></div>
           <div class="card"><h3>Demand %</h3><div class="chart-container"><canvas id="demand-chart"></canvas></div></div>
         </div>
-        <div class="grid-2" style="margin-top:10px;">
+        <div class="grid-2" style="margin-top:10px">
           <div class="card"><h3>Cash</h3><div class="chart-container"><canvas id="cash-chart"></canvas></div></div>
           <div class="card"><h3>Portfolio</h3><div class="chart-container"><canvas id="port-chart"></canvas></div></div>
         </div>
+        <div class="grid-2" style="margin-top:10px" id="space-charts" style="display:none">
+          <div class="card"><h3>Mission Success %</h3><div class="chart-container"><canvas id="success-chart"></canvas></div></div>
+          <div class="card"><h3>Mass Converted (tonnes)</h3><div class="chart-container"><canvas id="mass-chart"></canvas></div></div>
+        </div>
       </div>
+
+      <!-- MISSION CONTROL -->
+      <div class="panel" id="panel-mission">
+        <h2>Mission Control</h2>
+        <p class="subtitle">Launch rockets. Early missions require manual thermal control and navigation calculations.</p>
+        <div class="space-banner" id="space-status">Aerospace Division: Online. Select a mission.</div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>🚀 Available Missions</h3>
+            <div id="missions-list"></div>
+          </div>
+          <div class="card">
+            <h3>📡 Flight Systems</h3>
+            <div class="material-row"><span>Auto-Cool</span><span id="auto-cool-status" style="font-family:var(--mono)">OFF</span></div>
+            <div class="material-row"><span>Auto-Guidance</span><span id="auto-guide-status" style="font-family:var(--mono)">OFF</span></div>
+            <div class="material-row"><span>Full Autopilot</span><span id="autopilot-status" style="font-family:var(--mono)">OFF</span></div>
+            <div class="material-row"><span>Missions Flown</span><span id="missions-flown" style="font-family:var(--mono)">0</span></div>
+            <div class="material-row"><span>Success Rate</span><span id="success-rate" style="font-family:var(--mono)">—</span></div>
+            <div class="actions-bar" style="margin-top:12px">
+              <button class="secondary-btn" id="buy-autocool" onclick="buySpaceUpgrade('autoCool')">Auto-Cool ($2,500)</button>
+              <button class="secondary-btn" id="buy-autoguide" onclick="buySpaceUpgrade('autoGuide')">Auto-Guidance ($8,000)</button>
+              <button class="secondary-btn" id="buy-autopilot" onclick="buySpaceUpgrade('autopilot')">Full Autopilot ($35,000)</button>
+            </div>
+            <p class="hint">Automation lets you launch while managing the factory.</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3>📜 Mission Log</h3>
+          <div class="event-log" id="mission-log" style="max-height:160px"></div>
+        </div>
+      </div>
+
+      <!-- COSMOS -->
+      <div class="panel" id="panel-cosmos">
+        <h2>Cosmos — Penciliforming</h2>
+        <p class="subtitle">Claim celestial bodies and convert their mass into pencils.</p>
+        <div class="space-banner">Total mass converted: <strong id="total-mass">0</strong> tonnes · Space production: <strong id="cosmos-prod">0</strong>/s</div>
+        <div id="colonies-list"></div>
+        <div class="card" style="margin-top:12px">
+          <h3>Solar System Conversion</h3>
+          <div class="chart-container" style="height:220px"><canvas id="conversion-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- OFFICE -->
       <div class="panel" id="panel-office">
         <h2>Office</h2>
         <p class="subtitle">Saves and prestige.</p>
         <div class="grid-2">
           <div class="card">
             <h3>💾 Save</h3>
-            <p class="hint" style="margin-bottom:8px;">Auto-saves every 10s. Offline progress is applied when you return.</p>
+            <p class="hint" style="margin-bottom:8px">Auto-saves every 10s. Offline progress is applied when you return.</p>
             <div class="actions-bar">
               <button class="secondary-btn" id="save-btn">Force Save</button>
               <button class="secondary-btn" id="export-btn">Export</button>
               <button class="secondary-btn" id="import-btn">Import</button>
             </div>
-            <input type="file" id="import-file" accept=".json" style="display:none;">
+            <input type="file" id="import-file" accept=".json" style="display:none">
           </div>
           <div class="card">
             <h3>⚙️ Danger Zone</h3>
-            <div class="actions-bar">
-              <button class="secondary-btn" id="reset-btn" style="border-color:var(--rose); color:var(--rose);">Hard Reset</button>
-            </div>
-            <p class="hint" style="margin-top:6px;">Deletes everything permanently.</p>
+            <div class="actions-bar"><button class="secondary-btn" id="reset-btn" style="border-color:var(--rose);color:var(--rose)">Hard Reset</button></div>
+            <p class="hint" style="margin-top:6px">Deletes everything permanently.</p>
           </div>
         </div>
         <div class="prestige-box">
-          <h3 style="color:var(--purple); margin-bottom:4px;">🔄 Prestige</h3>
-          <p style="color:var(--text-dim); margin-bottom:8px; max-width:440px; margin-left:auto; margin-right:auto; font-size:0.86rem;">
+          <h3 style="color:var(--purple);margin-bottom:4px">🔄 Prestige</h3>
+          <p style="color:var(--text-dim);margin-bottom:8px;max-width:440px;margin-left:auto;margin-right:auto;font-size:0.86rem">
             Reset for a permanent production multiplier. Needs lifetime sales.
           </p>
-          <div style="font-family:var(--mono); margin-bottom:8px; font-size:0.86rem;">
-            Need: <strong id="prestige-req">$20,000</strong><br>
-            Gain: <strong id="prestige-gain">+0.00×</strong>
+          <div style="font-family:var(--mono);margin-bottom:8px;font-size:0.86rem">
+            Need: <strong id="prestige-req">$20,000</strong><br>Gain: <strong id="prestige-gain">+0.00×</strong>
           </div>
-          <button class="buy-btn" id="prestige-btn" style="max-width:200px; margin:0 auto; background:linear-gradient(180deg,var(--purple),#7a5a7a); color:#fff;" disabled>
-            Prestige
-          </button>
+          <button class="buy-btn" id="prestige-btn" style="max-width:200px;margin:0 auto;background:linear-gradient(180deg,var(--purple),#7a5a7a);color:#fff" disabled>Prestige</button>
         </div>
       </div>
     </main>
   </div>
+
+  <!-- OVERLAYS -->
+  <div class="overlay" id="overlay-thermal">
+    <div class="overlay-box">
+      <h3>⚠️ ENGINE OVERHEAT</h3>
+      <p>Core temperature critical. Spam cool to prevent structural failure.</p>
+      <div class="thermal-bar-bg"><div class="thermal-bar-fill" id="thermal-bar" style="width:70%"></div></div>
+      <div style="font-family:var(--mono);font-size:0.85rem;margin-bottom:6px">Temp: <span id="thermal-temp">870</span> K</div>
+      <button class="cool-btn" id="cool-btn">COOL ENGINE</button>
+      <div class="telemetry" id="thermal-telemetry">T+00:00 — Thermal excursion detected</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-formula">
+    <div class="overlay-box">
+      <h3>📐 Navigation Calculation Required</h3>
+      <p id="formula-prompt">Compute the required value. Constants are provided.</p>
+      <div class="telemetry" id="formula-constants"></div>
+      <input type="number" class="formula-input" id="formula-answer" step="any" placeholder="Enter value">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="buy-btn" style="flex:1" id="formula-submit">Submit</button>
+        <button class="secondary-btn" style="flex:1" id="formula-skip">Skip (+risk)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-result">
+    <div class="overlay-box" id="result-box">
+      <h3 id="result-title">Mission Complete</h3>
+      <p id="result-desc"></p>
+      <button class="buy-btn" id="result-ok">Acknowledge</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
+
   <script>
-    const SAVE_KEY = 'pencilFactory_v5_playable';
+    const SAVE_KEY = 'pencilFactory_v6_space';
     const MACHINES = [
-      { id: 'worker', name: 'Craftsman', icon: '👷', baseCost: 18, baseRate: 0.35, desc: 'Hand crafts pencils.' },
-      { id: 'extruder', name: 'Graphite Extruder', icon: '🔧', baseCost: 95, baseRate: 1.4, desc: 'Forms graphite cores.' },
-      { id: 'slatline', name: 'Cedar Slat Line', icon: '🪵', baseCost: 520, baseRate: 6.0, desc: 'Grooves and glues wood.' },
-      { id: 'lacquer', name: 'Lacquering Booth', icon: '🎨', baseCost: 2800, baseRate: 26, desc: 'Applies finish.' },
-      { id: 'assembly', name: 'Ferrule Assembly', icon: '🤖', baseCost: 14000, baseRate: 95, desc: 'Ferrule + eraser + QC.' },
-      { id: 'cnc', name: 'CNC Mill', icon: '⚙️', baseCost: 72000, baseRate: 360, desc: 'High-speed precision.' },
-      { id: 'wing', name: 'Full Wing', icon: '🏭', baseCost: 400000, baseRate: 1500, desc: 'Complete production hall.' },
-      { id: 'mega', name: 'Mega Complex', icon: '🏙️', baseCost: 2.8e6, baseRate: 6500, desc: 'Industrial campus.' }
+      { id:'worker', name:'Craftsman', icon:'👷', baseCost:18, baseRate:0.35, desc:'Hand crafts pencils.' },
+      { id:'extruder', name:'Graphite Extruder', icon:'🔧', baseCost:95, baseRate:1.4, desc:'Forms graphite cores.' },
+      { id:'slatline', name:'Cedar Slat Line', icon:'🪵', baseCost:520, baseRate:6.0, desc:'Grooves and glues wood.' },
+      { id:'lacquer', name:'Lacquering Booth', icon:'🎨', baseCost:2800, baseRate:26, desc:'Applies finish.' },
+      { id:'assembly', name:'Ferrule Assembly', icon:'🤖', baseCost:14000, baseRate:95, desc:'Ferrule + eraser + QC.' },
+      { id:'cnc', name:'CNC Mill', icon:'⚙️', baseCost:72000, baseRate:360, desc:'High-speed precision.' },
+      { id:'wing', name:'Full Wing', icon:'🏭', baseCost:400000, baseRate:1500, desc:'Complete production hall.' },
+      { id:'mega', name:'Mega Complex', icon:'🏙️', baseCost:2.8e6, baseRate:6500, desc:'Industrial campus.' }
     ];
     const UPGRADES = [
-      { id: 'click1', name: 'Better Bench', icon: '🪑', cost: 25, effect: 'clickPower', value: 1, desc: '+1 per click.', once: false },
-      { id: 'click2', name: 'Pneumatic Assist', icon: '💨', cost: 180, effect: 'clickPower', value: 3, desc: '+3 per click.', once: false },
-      { id: 'click3', name: 'Master Kit', icon: '🛠️', cost: 1200, effect: 'clickPower', value: 10, desc: '+10 per click.', once: false },
-      { id: 'click4', name: 'Workshop Pro', icon: '🏭', cost: 9000, effect: 'clickPower', value: 30, desc: '+30 per click.', once: false },
-      { id: 'quality1', name: 'Premium Graphite', icon: '⬛', cost: 120, effect: 'quality', value: 0.2, desc: 'Higher fair value.', once: true },
-      { id: 'quality2', name: 'Incense Cedar', icon: '🌲', cost: 750, effect: 'quality', value: 0.3, desc: 'Beautiful wood.', once: true },
-      { id: 'quality3', name: 'Artist Formula', icon: '🎨', cost: 5200, effect: 'quality', value: 0.4, desc: 'Specialty cores.', once: true },
-      { id: 'quality4', name: 'Signature Line', icon: '✒️', cost: 32000, effect: 'quality', value: 0.6, desc: 'Premium branding.', once: true },
-      { id: 'eff1', name: 'Lean Flow', icon: '📐', cost: 380, effect: 'rateMult', value: 0.15, desc: '+15% machine output.', once: true },
-      { id: 'eff2', name: 'Process Control', icon: '📊', cost: 3200, effect: 'rateMult', value: 0.25, desc: '+25% output.', once: true },
-      { id: 'eff3', name: 'Smart Sensors', icon: '📡', cost: 24000, effect: 'rateMult', value: 0.35, desc: '+35% output.', once: true },
-      { id: 'brand1', name: 'Art Fair Booth', icon: '🎪', cost: 150, effect: 'brand', value: 0.2, desc: 'Raises brand.', once: true },
-      { id: 'brand2', name: 'Artist Collab', icon: '✏️', cost: 1400, effect: 'brand', value: 0.3, desc: 'Better reputation.', once: true },
-      { id: 'brand3', name: 'Catalog Feature', icon: '📖', cost: 10000, effect: 'brand', value: 0.4, desc: 'National exposure.', once: true },
-      { id: 'brand4', name: 'Heritage Mark', icon: '🏅', cost: 55000, effect: 'brand', value: 0.55, desc: 'Legacy status.', once: true },
-      { id: 'mat1', name: 'Bulk Wood Deal', icon: '🌳', cost: 450, effect: 'matSave', value: 0.15, desc: '15% cheaper materials.', once: true },
-      { id: 'mat2', name: 'Supplier Contract', icon: '📝', cost: 3800, effect: 'matSave', value: 0.12, desc: 'More savings.', once: true },
-      { id: 'storage1', name: 'Bigger Warehouse', icon: '📦', cost: 1400, effect: 'storage', value: 7000, desc: '+7,000 space.', once: false },
-      { id: 'storage2', name: 'Mega Warehouse', icon: '🏗️', cost: 18000, effect: 'storage', value: 30000, desc: '+30,000 space.', once: false },
-      { id: 'offline', name: 'Night Shift', icon: '🌙', cost: 1100, effect: 'offlineCap', value: 4, desc: '+4h offline.', once: true }
+      { id:'click1', name:'Better Bench', icon:'🪑', cost:25, effect:'clickPower', value:1, desc:'+1 per click.', once:false },
+      { id:'click2', name:'Pneumatic Assist', icon:'💨', cost:180, effect:'clickPower', value:3, desc:'+3 per click.', once:false },
+      { id:'click3', name:'Master Kit', icon:'🛠️', cost:1200, effect:'clickPower', value:10, desc:'+10 per click.', once:false },
+      { id:'click4', name:'Workshop Pro', icon:'🏭', cost:9000, effect:'clickPower', value:30, desc:'+30 per click.', once:false },
+      { id:'quality1', name:'Premium Graphite', icon:'⬛', cost:120, effect:'quality', value:0.2, desc:'Higher fair value.', once:true },
+      { id:'quality2', name:'Incense Cedar', icon:'🌲', cost:750, effect:'quality', value:0.3, desc:'Beautiful wood.', once:true },
+      { id:'quality3', name:'Artist Formula', icon:'🎨', cost:5200, effect:'quality', value:0.4, desc:'Specialty cores.', once:true },
+      { id:'quality4', name:'Signature Line', icon:'✒️', cost:32000, effect:'quality', value:0.6, desc:'Premium branding.', once:true },
+      { id:'eff1', name:'Lean Flow', icon:'📐', cost:380, effect:'rateMult', value:0.15, desc:'+15% machine output.', once:true },
+      { id:'eff2', name:'Process Control', icon:'📊', cost:3200, effect:'rateMult', value:0.25, desc:'+25% output.', once:true },
+      { id:'eff3', name:'Smart Sensors', icon:'📡', cost:24000, effect:'rateMult', value:0.35, desc:'+35% output.', once:true },
+      { id:'brand1', name:'Art Fair Booth', icon:'🎪', cost:150, effect:'brand', value:0.2, desc:'Raises brand.', once:true },
+      { id:'brand2', name:'Artist Collab', icon:'✏️', cost:1400, effect:'brand', value:0.3, desc:'Better reputation.', once:true },
+      { id:'brand3', name:'Catalog Feature', icon:'📖', cost:10000, effect:'brand', value:0.4, desc:'National exposure.', once:true },
+      { id:'brand4', name:'Heritage Mark', icon:'🏅', cost:55000, effect:'brand', value:0.55, desc:'Legacy status.', once:true },
+      { id:'mat1', name:'Bulk Wood Deal', icon:'🌳', cost:450, effect:'matSave', value:0.15, desc:'15% cheaper materials.', once:true },
+      { id:'mat2', name:'Supplier Contract', icon:'📝', cost:3800, effect:'matSave', value:0.12, desc:'More savings.', once:true },
+      { id:'storage1', name:'Bigger Warehouse', icon:'📦', cost:1400, effect:'storage', value:7000, desc:'+7,000 space.', once:false },
+      { id:'storage2', name:'Mega Warehouse', icon:'🏗️', cost:18000, effect:'storage', value:30000, desc:'+30,000 space.', once:false },
+      { id:'offline', name:'Night Shift', icon:'🌙', cost:1100, effect:'offlineCap', value:4, desc:'+4h offline.', once:true }
     ];
     const MARKETING = [
-      { id: 'ads', name: 'Local Ads', icon: '📰', baseCost: 28, costMult: 1.45, boost: 0.18, desc: 'Flyers & local papers. Great early.' },
-      { id: 'logo', name: 'Logo Design', icon: '🎨', baseCost: 70, costMult: 1.5, boost: 0.22, desc: 'Professional logo. Strong signal.' },
-      { id: 'social', name: 'Social Campaign', icon: '📱', baseCost: 220, costMult: 1.55, boost: 0.28, desc: 'Online posts & influencers.' },
-      { id: 'catalog', name: 'Print Catalog', icon: '📖', baseCost: 650, costMult: 1.6, boost: 0.32, desc: 'Schools & offices.' },
-      { id: 'tv', name: 'Regional TV Spot', icon: '📺', baseCost: 3200, costMult: 1.7, boost: 0.4, desc: 'Broadcast reach.' },
-      { id: 'global', name: 'Global Branding', icon: '🌍', baseCost: 20000, costMult: 1.75, boost: 0.5, desc: 'Worldwide recognition.' }
+      { id:'ads', name:'Local Ads', icon:'📰', baseCost:28, costMult:1.45, boost:0.18, desc:'Flyers & local papers. Great early.' },
+      { id:'logo', name:'Logo Design', icon:'🎨', baseCost:70, costMult:1.5, boost:0.22, desc:'Professional logo. Strong signal.' },
+      { id:'social', name:'Social Campaign', icon:'📱', baseCost:220, costMult:1.55, boost:0.28, desc:'Online posts & influencers.' },
+      { id:'catalog', name:'Print Catalog', icon:'📖', baseCost:650, costMult:1.6, boost:0.32, desc:'Schools & offices.' },
+      { id:'tv', name:'Regional TV Spot', icon:'📺', baseCost:3200, costMult:1.7, boost:0.4, desc:'Broadcast reach.' },
+      { id:'global', name:'Global Branding', icon:'🌍', baseCost:20000, costMult:1.75, boost:0.5, desc:'Worldwide recognition.' }
     ];
     const STOCKS_DEF = [
-      { id: 'cedar', ticker: 'CDR', name: 'CedarWood', base: 10, vol: 0.018, sens: 0.12 },
-      { id: 'graph', ticker: 'GRP', name: 'GraphiteGlobal', base: 22, vol: 0.024, sens: 0.09 },
-      { id: 'mach', ticker: 'PML', name: 'PencilMach', base: 35, vol: 0.028, sens: 0.18 },
-      { id: 'office', ticker: 'OFS', name: 'OfficeSupply', base: 15, vol: 0.015, sens: 0.22 },
-      { id: 'lead', ticker: 'LTR', name: 'LeadTech', base: 48, vol: 0.032, sens: 0.07 }
+      { id:'cedar', ticker:'CDR', name:'CedarWood', base:10, vol:0.018, sens:0.12, sector:'materials' },
+      { id:'graph', ticker:'GRP', name:'GraphiteGlobal', base:22, vol:0.024, sens:0.09, sector:'materials' },
+      { id:'mach', ticker:'PML', name:'PencilMach', base:35, vol:0.028, sens:0.18, sector:'industrial' },
+      { id:'office', ticker:'OFS', name:'OfficeSupply', base:15, vol:0.015, sens:0.22, sector:'consumer' },
+      { id:'lead', ticker:'LTR', name:'LeadTech', base:48, vol:0.032, sens:0.07, sector:'tech' },
+      { id:'aero', ticker:'AXP', name:'AeroPencil', base:28, vol:0.04, sens:0.35, sector:'aerospace' },
+      { id:'orbit', ticker:'ORB', name:'OrbitalGraphite', base:65, vol:0.045, sens:0.4, sector:'aerospace' },
+      { id:'lunar', ticker:'LNR', name:'LunarResources', base:120, vol:0.05, sens:0.5, sector:'aerospace' }
     ];
-    let state = {
-      cash: 45, pencils: 0, materials: 350, clickPower: 1, quality: 1.0, rateMult: 1, brand: 1.0,
-      marketing: {}, matSave: 0, storage: 3000, prestigeLevel: 0, prestigeMult: 1,
-      lifetimeSales: 0, totalProduced: 0, totalSold: 0, machines: {}, upgradesOwned: {}, stocks: {},
-      askingPrice: 0.95, offlineCapHours: 8, lastTick: Date.now(),
-      history: { prod: [], demand: [], cash: [], port: [], labels: [] }, log: [],
-      clearanceActive: false, clearanceTimer: 0
-    };
-    MACHINES.forEach(m => state.machines[m.id] = 0);
-    MARKETING.forEach(m => state.marketing[m.id] = 0);
-    STOCKS_DEF.forEach(s => { state.stocks[s.id] = { price: s.base, shares: 0, history: [s.base] }; });
 
-    function safe(n, f=0) { n=Number(n); return (!isFinite(n)||isNaN(n))?f:n; }
+    const MISSIONS = [
+      { id:'leo', name:'LEO Pencil Package', desc:'Low Earth Orbit delivery demonstration. First step.', cost:1200, materials:80, difficulty:0.15, reward:3500, unlockColony:null, reqSold:0, formula:null },
+      { id:'lunar', name:'Lunar Sample Return', desc:'Soft land on the Moon, collect regolith, return graphite-rich samples.', cost:8500, materials:400, difficulty:0.28, reward:22000, unlockColony:'moon', reqSold:5e5, formula:'hohmann' },
+      { id:'mars', name:'Mars Recon Probe', desc:'Hohmann transfer to Mars. Deploy spectrometer and ISRU test.', cost:45000, materials:1800, difficulty:0.38, reward:95000, unlockColony:'mars', reqSold:3e6, formula:'deltav' },
+      { id:'europa', name:'Europa Ice Core', desc:'Jupiter system. Extract water ice for future propellant.', cost:180000, materials:6000, difficulty:0.48, reward:320000, unlockColony:'europa', reqSold:2e7, formula:'phase' },
+      { id:'titan', name:'Titan Atmosphere', desc:'Saturn system. Sample organics and test long-range comms.', cost:650000, materials:15000, difficulty:0.55, reward:1.1e6, unlockColony:'titan', reqSold:8e7, formula:null },
+      { id:'kuiper', name:'Kuiper Outpost', desc:'Establish automated pencil factory beyond Neptune.', cost:2.5e6, materials:40000, difficulty:0.62, reward:4.5e6, unlockColony:'kuiper', reqSold:3e8, formula:null }
+    ];
+
+    const COLONIES = [
+      { id:'moon', name:'Luna Outpost', icon:'🌕', baseRate:12, mass:7.3e10, desc:'Near-side factory. First off-world production.' },
+      { id:'mars', name:'Mars Colony', icon:'🔴', baseRate:85, mass:6.4e11, desc:'ISRU-enabled. Self-sufficient graphite extraction.' },
+      { id:'europa', name:'Europa Station', icon:'❄️', baseRate:320, mass:4.8e10, desc:'Ice mining + radiation-hardened lines.' },
+      { id:'titan', name:'Titan Complex', icon:'🟠', baseRate:1100, mass:1.3e11, desc:'Hydrocarbon feedstock conversion.' },
+      { id:'kuiper', name:'Kuiper Swarm', icon:'☄️', baseRate:4500, mass:1e12, desc:'Distributed autonomous factories.' }
+    ];
+
+    let state = {
+      cash:45, pencils:0, materials:350, clickPower:1, quality:1.0, rateMult:1, brand:1.0,
+      marketing:{}, matSave:0, storage:3000, prestigeLevel:0, prestigeMult:1,
+      lifetimeSales:0, totalProduced:0, totalSold:0, machines:{}, upgradesOwned:{}, stocks:{},
+      askingPrice:0.95, offlineCapHours:8, lastTick:Date.now(),
+      history:{prod:[],demand:[],cash:[],port:[],success:[],mass:[],aero:[],labels:[]}, log:[],
+      clearanceActive:false, clearanceTimer:0,
+      // Space
+      spaceUnlocked:false, cosmosUnlocked:false,
+      autoCool:false, autoGuide:false, autopilot:false,
+      missionsFlown:0, missionsSuccess:0, missionLog:[],
+      colonies:{}, // id -> {owned:bool, progress:0-1, rateMult:1}
+      totalMassConverted:0,
+      currentMission:null, flightPhase:null
+    };
+    MACHINES.forEach(m => state.machines[m.id]=0);
+    MARKETING.forEach(m => state.marketing[m.id]=0);
+    STOCKS_DEF.forEach(s => { state.stocks[s.id]={price:s.base, shares:0, history:[s.base]}; });
+    COLONIES.forEach(c => { state.colonies[c.id]={owned:false, progress:0, rateMult:1}; });
+
+    function safe(n,f=0){n=Number(n);return(!isFinite(n)||isNaN(n))?f:n;}
     function clamp(n,a,b){return Math.max(a,Math.min(b,safe(n,a)));}
     function formatNum(n,d=0){
       n=safe(n);
@@ -947,7 +631,8 @@
     }
     function formatMoney(n){n=safe(n);if(Math.abs(n)>=1e6)return'$'+formatNum(n,2);return'$'+n.toFixed(2);}
     function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2400);}
-    function logEvent(msg){const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});state.log.unshift({time,msg});if(state.log.length>30)state.log.pop();renderLog();}
+    function logEvent(msg){const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});state.log.unshift({time,msg});if(state.log.length>40)state.log.pop();renderLog();}
+    function missionLog(msg){const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});state.missionLog.unshift({time,msg});if(state.missionLog.length>50)state.missionLog.pop();renderMissionLog();}
     function spawnFloat(text){const el=document.createElement('div');el.className='float-money';el.textContent=text;el.style.left=(window.innerWidth*0.48+(Math.random()-0.5)*90)+'px';el.style.top=(window.innerHeight*0.42+(Math.random()-0.5)*40)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1150);}
     const displayCache={};
     function animateValue(id,val,fmt){const el=document.getElementById(id);if(!el)return;const prev=displayCache[id];displayCache[id]=val;el.textContent=fmt?fmt(val):val;if(prev!==undefined&&Math.abs(prev-val)>0.001){el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');}}
@@ -955,32 +640,256 @@
     function getMachineCost(m){return Math.floor(m.baseCost*Math.pow(1.14,state.machines[m.id]||0));}
     function getMachineRate(m){return m.baseRate*(state.machines[m.id]||0)*state.rateMult*state.prestigeMult;}
     function getTotalRate(){return MACHINES.reduce((s,m)=>s+getMachineRate(m),0);}
+    function getSpaceRate(){
+      let r=0;
+      COLONIES.forEach(c=>{
+        const col=state.colonies[c.id];
+        if(col.owned) r+=c.baseRate*col.rateMult*col.progress*state.prestigeMult;
+      });
+      return r;
+    }
     function getUnitMaterialCost(){const base=0.07+(state.quality-1)*0.16;return Math.max(0.025,base*(1-state.matSave));}
     function getPerceivedValue(){return 0.82*state.quality*(0.72+state.brand*0.42)*(1+state.prestigeLevel*0.02);}
     function getMarketingBoost(){let t=0;MARKETING.forEach(m=>{t+=(state.marketing[m.id]||0)*m.boost;});return t;}
     function getTotalMarketingLevel(){return MARKETING.reduce((s,m)=>s+(state.marketing[m.id]||0),0);}
     function getDemandPercent(){
-      let demand=0.52;
-      demand+=getMarketingBoost();
-      demand*=(0.88+state.brand*0.16);
-      demand*=(0.97+Math.min(0.18,state.totalSold/60000));
-      const perceived=Math.max(0.25,getPerceivedValue());
-      let price=state.askingPrice;
-      if(state.clearanceActive)price*=0.5;
-      const ratio=price/perceived;
-      if(ratio>1.15)demand*=Math.pow(1/ratio,1.5);
-      else if(ratio<0.9)demand*=1+(0.9-ratio)*0.6;
-      if(state.clearanceActive)demand*=1.65;
-      return clamp(demand,0.08,5.0);
+      let demand=0.52;demand+=getMarketingBoost();demand*=(0.88+state.brand*0.16);demand*=(0.97+Math.min(0.18,state.totalSold/60000));
+      const perceived=Math.max(0.25,getPerceivedValue());let price=state.askingPrice;if(state.clearanceActive)price*=0.5;
+      const ratio=price/perceived;if(ratio>1.15)demand*=Math.pow(1/ratio,1.5);else if(ratio<0.9)demand*=1+(0.9-ratio)*0.6;
+      if(state.clearanceActive)demand*=1.65;return clamp(demand,0.08,5.0);
     }
-    function getSalesRate(){
-      const base=1.4+state.prestigeLevel*1.0+Math.log10(1+state.totalSold+8)*1.4+getTotalMarketingLevel()*0.55;
-      return base*getDemandPercent();
-    }
+    function getSalesRate(){const base=1.4+state.prestigeLevel*1.0+Math.log10(1+state.totalSold+8)*1.4+getTotalMarketingLevel()*0.55;return base*getDemandPercent();}
     function getPortfolioValue(){return STOCKS_DEF.reduce((s,def)=>{const st=state.stocks[def.id];return s+(st.shares||0)*(st.price||0);},0);}
     function getPrestigeGain(){return Math.max(0,Math.sqrt(state.lifetimeSales/20000)*0.15);}
     function getNextPrestigeReq(){return 20000*Math.pow(2.7,state.prestigeLevel);}
 
+    // ========== SPACE SYSTEMS ==========
+    function checkSpaceUnlocks(){
+      if(!state.spaceUnlocked && state.lifetimeSales>=80000){
+        state.spaceUnlocked=true;
+        document.getElementById('nav-mission').classList.remove('locked');
+        document.getElementById('space-res').style.display='flex';
+        logEvent('Aerospace Division authorized. Mission Control online.');
+        toast('🚀 Aerospace Division unlocked!');
+        document.getElementById('brand-name').textContent='Pencil Aerospace';
+      }
+      if(!state.cosmosUnlocked && state.missionsSuccess>=2){
+        state.cosmosUnlocked=true;
+        document.getElementById('nav-cosmos').classList.remove('locked');
+        document.getElementById('space-charts').style.display='grid';
+        logEvent('Cosmos Division activated. Planetary conversion authorized.');
+        toast('🌌 Cosmos panel unlocked!');
+      }
+      // Soft foreshadowing
+      if(state.lifetimeSales>15000 && state.lifetimeSales<80000 && Math.random()<0.002){
+        const msgs=['Government inquiry: vacuum-rated pencils?','Aerospace firm requests graphite samples.','Internal memo: orbital delivery feasibility study begun.'];
+        logEvent(msgs[Math.floor(Math.random()*msgs.length)]);
+      }
+    }
+
+    function buySpaceUpgrade(type){
+      const costs={autoCool:2500,autoGuide:8000,autopilot:35000};
+      if(state[type]) {toast('Already owned');return;}
+      if(state.cash<costs[type]){toast('Need '+formatMoney(costs[type]));return;}
+      state.cash-=costs[type];state[type]=true;
+      logEvent(`Purchased ${type}`);toast(`${type} online`);
+      renderMissionUI();
+    }
+
+    function canLaunch(m){
+      return state.cash>=m.cost && state.materials>=m.materials && state.lifetimeSales>=m.reqSold && !state.currentMission;
+    }
+
+    function startMission(id){
+      const m=MISSIONS.find(x=>x.id===id);if(!m||!canLaunch(m))return;
+      state.cash-=m.cost;state.materials-=m.materials;
+      state.currentMission={...m, riskBonus:0};
+      missionLog(`Launch sequence initiated: ${m.name}`);
+      toast('Launch sequence started');
+
+      if(state.autopilot){
+        // Fully automatic
+        setTimeout(()=>resolveMission(Math.random()>m.difficulty*0.55), 1800);
+        return;
+      }
+
+      // Formula phase (early missions)
+      if(m.formula && !state.autoGuide){
+        showFormula(m);
+      } else {
+        beginThermalOrResolve(m);
+      }
+    }
+
+    function showFormula(m){
+      const overlay=document.getElementById('overlay-formula');
+      const prompt=document.getElementById('formula-prompt');
+      const consts=document.getElementById('formula-constants');
+      const answer=document.getElementById('formula-answer');
+      answer.value='';
+
+      let correct=0, unit='';
+      if(m.formula==='hohmann'){
+        // Simplified: semi-major axis of transfer ≈ (r1+r2)/2 in Earth radii. Earth=1, Moon≈60.
+        prompt.textContent='Hohmann transfer to lunar distance (~60 Earth radii). Compute approximate semi-major axis of the transfer ellipse (Earth radii).';
+        consts.textContent='r_earth = 1 RE\nr_moon ≈ 60 RE\na_transfer = (r1 + r2) / 2';
+        correct=30.5; unit='RE';
+      } else if(m.formula==='deltav'){
+        prompt.textContent='Approximate Δv for Mars Hohmann (km/s). Typical value is near 5.5–6.0 km/s total for the two burns.';
+        consts.textContent='Earth orbital v ≈ 29.8 km/s\nMars orbital v ≈ 24.1 km/s\nTypical total Δv ≈ 5.7 km/s';
+        correct=5.7; unit='km/s';
+      } else if(m.formula==='phase'){
+        prompt.textContent='Ideal phase angle for Earth–Mars transfer is approximately 44°. Enter the phase angle in degrees.';
+        consts.textContent='Hohmann to Mars synodic geometry\nIdeal lead angle ≈ 44°';
+        correct=44; unit='°';
+      }
+      overlay.dataset.correct=correct;
+      overlay.dataset.unit=unit;
+      overlay.classList.add('show');
+
+      document.getElementById('formula-submit').onclick=()=>{
+        const val=parseFloat(answer.value);
+        const diff=Math.abs(val-correct)/Math.max(1,Math.abs(correct));
+        if(diff<0.12){
+          missionLog('Navigation solution accepted. Trajectory locked.');
+          toast('Navigation OK');
+        } else {
+          state.currentMission.riskBonus+=0.18;
+          missionLog('Navigation error — elevated risk.');
+          toast('Imprecise solution — higher risk');
+        }
+        overlay.classList.remove('show');
+        beginThermalOrResolve(m);
+      };
+      document.getElementById('formula-skip').onclick=()=>{
+        state.currentMission.riskBonus+=0.25;
+        missionLog('Navigation skipped — risk increased.');
+        overlay.classList.remove('show');
+        beginThermalOrResolve(m);
+      };
+    }
+
+    function beginThermalOrResolve(m){
+      if(state.autoCool){
+        // Skip thermal, maybe small random event
+        setTimeout(()=>resolveMission(Math.random() > (m.difficulty+ (state.currentMission.riskBonus||0))*0.7), 1200);
+      } else {
+        startThermalMinigame(m);
+      }
+    }
+
+    // Thermal minigame
+    let thermalInterval=null, thermalTemp=700, thermalClicks=0;
+    function startThermalMinigame(m){
+      const overlay=document.getElementById('overlay-thermal');
+      const bar=document.getElementById('thermal-bar');
+      const tempEl=document.getElementById('thermal-temp');
+      const tel=document.getElementById('thermal-telemetry');
+      thermalTemp=720+Math.random()*80;
+      thermalClicks=0;
+      tel.textContent=`T+00:00 — Thermal excursion at ${Math.round(thermalTemp)} K`;
+      overlay.classList.add('show');
+
+      const coolBtn=document.getElementById('cool-btn');
+      coolBtn.onclick=()=>{
+        thermalTemp-=18+Math.random()*12;
+        thermalClicks++;
+        if(thermalTemp<500) thermalTemp=500;
+        updateThermalUI();
+      };
+
+      function updateThermalUI(){
+        const pct=clamp((thermalTemp-500)/500*100,0,100);
+        bar.style.width=pct+'%';
+        tempEl.textContent=Math.round(thermalTemp);
+        if(thermalTemp>950) bar.style.background='linear-gradient(90deg,#c47b6a,#e07a3d)';
+        else if(thermalTemp>800) bar.style.background='linear-gradient(90deg,#e07a3d,#d4b483)';
+        else bar.style.background='linear-gradient(90deg,#6f9b6a,#5a8a8a)';
+      }
+      updateThermalUI();
+
+      let t=0;
+      thermalInterval=setInterval(()=>{
+        t+=0.1;
+        thermalTemp+=4.5+Math.random()*3.5; // heating
+        if(thermalTemp>1100){
+          clearInterval(thermalInterval);
+          overlay.classList.remove('show');
+          resolveMission(false); // exploded
+          return;
+        }
+        updateThermalUI();
+        if(t>12 || (thermalTemp<620 && thermalClicks>8)){
+          clearInterval(thermalInterval);
+          overlay.classList.remove('show');
+          const successChance=1-(m.difficulty+(state.currentMission.riskBonus||0))*0.65;
+          resolveMission(Math.random()<successChance);
+        }
+      },100);
+    }
+
+    function resolveMission(success){
+      const m=state.currentMission;if(!m)return;
+      state.missionsFlown++;
+      if(success){
+        state.missionsSuccess++;
+        state.cash+=m.reward;
+        state.lifetimeSales+=m.reward*0.3;
+        missionLog(`SUCCESS — ${m.name}. +${formatMoney(m.reward)}`);
+        logEvent(`Mission success: ${m.name}`);
+        // Boost aerospace stocks
+        ['aero','orbit','lunar'].forEach(id=>{
+          if(state.stocks[id]) state.stocks[id].price*=1.04+Math.random()*0.06;
+        });
+        if(m.unlockColony && !state.colonies[m.unlockColony].owned){
+          state.colonies[m.unlockColony].owned=true;
+          state.colonies[m.unlockColony].progress=0.05;
+          missionLog(`Colony established: ${COLONIES.find(c=>c.id===m.unlockColony).name}`);
+          toast('Colony founded!');
+          checkSpaceUnlocks();
+        }
+        showResult(true, m);
+      } else {
+        missionLog(`FAILURE — ${m.name}. Vehicle lost.`);
+        logEvent(`Mission failed: ${m.name}`);
+        ['aero','orbit','lunar'].forEach(id=>{
+          if(state.stocks[id]) state.stocks[id].price*=0.92+Math.random()*0.04;
+        });
+        showResult(false, m);
+      }
+      state.currentMission=null;
+      renderMissionUI();renderResources();renderStocks();
+    }
+
+    function showResult(success, m){
+      const overlay=document.getElementById('overlay-result');
+      const box=document.getElementById('result-box');
+      const title=document.getElementById('result-title');
+      const desc=document.getElementById('result-desc');
+      box.className='overlay-box '+(success?'success-banner':'fail-banner');
+      title.textContent=success?'Mission Success':'Mission Failure';
+      desc.textContent=success
+        ? `${m.name} completed. Payload delivered. Reward ${formatMoney(m.reward)} credited.`
+        : `${m.name} lost. Telemetry ended abruptly. Review thermal and guidance systems.`;
+      overlay.classList.add('show');
+      document.getElementById('result-ok').onclick=()=>overlay.classList.remove('show');
+    }
+
+    // Colony tick
+    function tickColonies(dt){
+      COLONIES.forEach(c=>{
+        const col=state.colonies[c.id];
+        if(!col.owned) return;
+        // Slow conversion progress
+        col.progress=Math.min(1, col.progress + dt*0.0008*(0.5+col.rateMult));
+        const produced=c.baseRate*col.progress*col.rateMult*state.prestigeMult*dt;
+        state.pencils=Math.min(state.storage, state.pencils+produced);
+        state.totalProduced+=produced;
+        state.totalMassConverted+=produced*0.00012; // flavour mass
+      });
+    }
+
+    // ========== CORE GAME ==========
     function produceManual(){
       if(state.pencils>=state.storage){toast('Warehouse full!');return;}
       const amount=state.clickPower*state.prestigeMult;
@@ -1044,15 +953,22 @@
       state.brand=1+state.prestigeLevel*0.06;state.marketing={};MARKETING.forEach(m=>state.marketing[m.id]=0);
       state.matSave=0;state.storage=3000;state.totalProduced=0;state.totalSold=0;state.lifetimeSales=0;
       state.machines={};MACHINES.forEach(m=>state.machines[m.id]=0);state.upgradesOwned={};state.askingPrice=0.95;state.clearanceActive=false;
+      // Keep space progress lightly
+      state.autoCool=false;state.autoGuide=false;state.autopilot=false;
       logEvent(`PRESTIGE! ×${state.prestigeMult.toFixed(2)}`);toast(`Prestige +${gain.toFixed(2)}×`);renderAll();saveGame();
     }
     function tickStocks(){
-      const rate=getTotalRate();
+      const rate=getTotalRate()+getSpaceRate();
+      const successRate=state.missionsFlown>0?state.missionsSuccess/state.missionsFlown:0.5;
       STOCKS_DEF.forEach(def=>{
         const st=state.stocks[def.id];
-        let change=(Math.random()-0.5)*def.vol*st.price;change+=(def.base-st.price)*0.0015;
-        if(rate>20)change+=rate*0.00012*def.sens*(Math.random()>0.4?1:-0.3);
-        st.price=clamp(st.price+change,0.4,5000);st.history.push(st.price);if(st.history.length>40)st.history.shift();
+        let change=(Math.random()-0.5)*def.vol*st.price;change+=(def.base-st.price)*0.0012;
+        if(rate>20)change+=rate*0.0001*def.sens*(Math.random()>0.4?1:-0.3);
+        if(def.sector==='aerospace'){
+          change+=(successRate-0.5)*st.price*0.008;
+          if(state.currentMission) change*=1.4;
+        }
+        st.price=clamp(st.price+change,0.4,8000);st.history.push(st.price);if(st.history.length>50)st.history.shift();
       });
     }
 
@@ -1066,6 +982,7 @@
         produced=Math.min(produced,state.storage-state.pencils);
         if(produced>0){state.pencils+=produced;state.totalProduced+=produced;state.materials=Math.max(0,state.materials-produced*0.7);}
       }
+      tickColonies(dt);
       const salesRate=getSalesRate();
       let toSell=Math.min(Math.max(0,state.pencils),salesRate*dt);
       if(toSell>=0.015&&state.pencils>=0.015){
@@ -1079,21 +996,29 @@
       if(Math.random()<dt/1.9)tickStocks();
       if(Math.random()<dt/2.0){
         const label=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-        state.history.labels.push(label);state.history.prod.push(rate);state.history.demand.push(getDemandPercent()*100);
+        state.history.labels.push(label);state.history.prod.push(rate+getSpaceRate());state.history.demand.push(getDemandPercent()*100);
         state.history.cash.push(state.cash);state.history.port.push(getPortfolioValue());
-        if(state.history.labels.length>40)['labels','prod','demand','cash','port'].forEach(k=>state.history[k].shift());
+        state.history.success.push(state.missionsFlown>0? (state.missionsSuccess/state.missionsFlown*100):50);
+        state.history.mass.push(state.totalMassConverted);
+        const aeroAvg=(state.stocks.aero.price+state.stocks.orbit.price+state.stocks.lunar.price)/3;
+        state.history.aero.push(aeroAvg);
+        if(state.history.labels.length>45)['labels','prod','demand','cash','port','success','mass','aero'].forEach(k=>state.history[k].shift());
         updateCharts();
       }
+      checkSpaceUnlocks();
       state.cash=clamp(state.cash,0,1e18);state.pencils=clamp(state.pencils,0,state.storage);state.materials=clamp(state.materials,0,5e6);
       renderResources();renderDemandUI();requestAnimationFrame(gameLoop);
     }
 
+    // ========== RENDER ==========
     function renderResources(){
       animateValue('cash-display',state.cash,formatMoney);
       animateValue('pencils-display',state.pencils,n=>formatNum(n,0));
       animateValue('rate-display',getTotalRate(),n=>formatNum(n,1)+'/s');
       animateValue('sales-display',getSalesRate(),n=>formatNum(n,1)+'/s');
       animateValue('demand-display',getDemandPercent()*100,n=>Math.round(n)+'%');
+      const sp=getSpaceRate();
+      if(document.getElementById('space-prod-display')) animateValue('space-prod-display',sp,n=>formatNum(n,1)+'/s');
       const cp=document.getElementById('click-power');if(cp)cp.textContent=formatNum(state.clickPower*state.prestigeMult,1);
       const uc=document.getElementById('unit-cost');if(uc)uc.textContent=getUnitMaterialCost().toFixed(2);
       const qb=document.getElementById('quality-badge');
@@ -1109,6 +1034,9 @@
       const preq=document.getElementById('prestige-req');if(preq)preq.textContent=formatMoney(req);
       const pg=document.getElementById('prestige-gain');if(pg)pg.textContent='+'+gain.toFixed(2)+'×';
       const pbtn=document.getElementById('prestige-btn');if(pbtn){pbtn.disabled=state.lifetimeSales<req;pbtn.textContent=state.lifetimeSales<req?`Need ${formatMoney(req)}`:'Prestige Now';}
+      // Cosmos numbers
+      const tm=document.getElementById('total-mass');if(tm)tm.textContent=formatNum(state.totalMassConverted,1);
+      const cp2=document.getElementById('cosmos-prod');if(cp2)cp2.textContent=formatNum(getSpaceRate(),1);
     }
     function renderDemandUI(){
       const demand=getDemandPercent();const pctVisual=Math.min(100,(demand/2.2)*100);
@@ -1127,22 +1055,23 @@
       else{live.innerHTML=`Selling <strong>${formatNum(sales,1)}/s</strong> → <strong>${formatMoney(rev)}/s</strong>`;live.style.color='var(--sage-bright)';live.style.background='rgba(111,155,106,0.12)';}}
     }
     function renderLog(){const el=document.getElementById('event-log');if(!el)return;el.innerHTML=state.log.slice(0,8).map(e=>`<div><span class="time">${e.time}</span>${e.msg}</div>`).join('')||'<div style="color:var(--text-muted)">Start producing...</div>';}
+    function renderMissionLog(){const el=document.getElementById('mission-log');if(!el)return;el.innerHTML=state.missionLog.slice(0,12).map(e=>`<div><span class="time">${e.time}</span>${e.msg}</div>`).join('')||'<div style="color:var(--text-muted)">No flights yet.</div>';}
     function renderMachines(){
       const grid=document.getElementById('machines-grid');if(!grid)return;const totalRate=getTotalRate();
       grid.innerHTML=MACHINES.map(m=>{const owned=state.machines[m.id]||0;const cost=getMachineCost(m);const rate=getMachineRate(m);const can=state.cash>=cost;const active=owned>0&&totalRate>0;
-        return`<div class="card machine"><div class="machine-top"><span class="machine-name"><span class="dot ${active?'on':''}"></span>${m.icon} ${m.name}</span><span class="machine-level">×${owned}</span></div><div class="machine-stats"><span>${formatNum(rate,1)}/s</span><span>${formatMoney(cost)}</span></div><div class="machine-bar"><div class="machine-bar-fill" style="width:${Math.min(100,owned*7)}%"></div></div><p style="font-size:0.72rem;color:var(--text-dim);margin:2px 0 0;">${m.desc}</p><button class="buy-btn" ${can?'':'disabled'} onclick="buyMachine('${m.id}')">${can?'Buy — '+formatMoney(cost):'Need '+formatMoney(cost)}</button></div>`;}).join('');
+        return`<div class="card machine"><div class="machine-top"><span class="machine-name"><span class="dot ${active?'on':''}"></span>${m.icon} ${m.name}</span><span class="machine-level">×${owned}</span></div><div class="machine-stats"><span>${formatNum(rate,1)}/s</span><span>${formatMoney(cost)}</span></div><div class="machine-bar"><div class="machine-bar-fill" style="width:${Math.min(100,owned*7)}%"></div></div><p style="font-size:0.72rem;color:var(--text-dim);margin:2px 0 0">${m.desc}</p><button class="buy-btn" ${can?'':'disabled'} onclick="buyMachine('${m.id}')">${can?'Buy — '+formatMoney(cost):'Need '+formatMoney(cost)}</button></div>`;}).join('');
     }
     function renderUpgrades(){
       const grid=document.getElementById('upgrades-grid');if(!grid)return;
       grid.innerHTML=UPGRADES.map(u=>{const owned=state.upgradesOwned[u.id]||0;
         if(u.once&&owned>0)return`<div class="upgrade" style="opacity:0.45"><div class="upgrade-icon">${u.icon}</div><div class="upgrade-info"><div class="upgrade-name">${u.name} ✓</div><div class="upgrade-desc">${u.desc}</div></div></div>`;
         const cost=Math.floor(u.cost*Math.pow(1.45,owned));const can=state.cash>=cost;
-        return`<div class="upgrade"><div class="upgrade-icon">${u.icon}</div><div class="upgrade-info"><div class="upgrade-name">${u.name}</div><div class="upgrade-desc">${u.desc}</div><div class="upgrade-effect">${formatMoney(cost)}</div><button class="buy-btn" style="margin-top:4px;width:auto;padding:4px 10px;" ${can?'':'disabled'} onclick="buyUpgrade('${u.id}')">Research</button></div></div>`;}).join('');
+        return`<div class="upgrade"><div class="upgrade-icon">${u.icon}</div><div class="upgrade-info"><div class="upgrade-name">${u.name}</div><div class="upgrade-desc">${u.desc}</div><div class="upgrade-effect">${formatMoney(cost)}</div><button class="buy-btn" style="margin-top:4px;width:auto;padding:4px 10px" ${can?'':'disabled'} onclick="buyUpgrade('${u.id}')">Research</button></div></div>`;}).join('');
     }
     function renderMarketing(){
       const list=document.getElementById('marketing-list');
       if(list){list.innerHTML=MARKETING.map(m=>{const lvl=state.marketing[m.id]||0;const cost=Math.floor(m.baseCost*Math.pow(m.costMult,lvl));const can=state.cash>=cost;
-        return`<div class="mkt-card"><div class="mkt-title">${m.icon} ${m.name}</div><div class="mkt-desc">${m.desc}</div><div style="display:flex;justify-content:space-between;align-items:center;"><span class="mkt-level">Lv ${lvl} · +${Math.round(m.boost*100)}% each</span><button class="buy-btn" style="width:auto;padding:4px 11px;margin:0;" ${can?'':'disabled'} onclick="buyMarketing('${m.id}')">${can?formatMoney(cost):'Need '+formatMoney(cost)}</button></div></div>`;}).join('');}
+        return`<div class="mkt-card"><div class="mkt-title">${m.icon} ${m.name}</div><div class="mkt-desc">${m.desc}</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="mkt-level">Lv ${lvl} · +${Math.round(m.boost*100)}% each</span><button class="buy-btn" style="width:auto;padding:4px 11px;margin:0" ${can?'':'disabled'} onclick="buyMarketing('${m.id}')">${can?formatMoney(cost):'Need '+formatMoney(cost)}</button></div></div>`;}).join('');}
       document.getElementById('mkt-total-level').textContent=getTotalMarketingLevel();
       document.getElementById('mkt-demand-boost').textContent=Math.round(getDemandPercent()*100)+'%';
       document.getElementById('mkt-brand').textContent=state.brand.toFixed(2);
@@ -1161,15 +1090,57 @@
       const list=document.getElementById('stocks-list');if(!list)return;
       document.getElementById('portfolio-detail').textContent=formatMoney(getPortfolioValue());
       list.innerHTML=STOCKS_DEF.map(def=>{const st=state.stocks[def.id];const prev=st.history.length>1?st.history[st.history.length-2]:st.price;const change=st.price-prev;const pct=(change/(prev||1))*100;const cls=change>=0?'up':'down';
-        return`<div class="stock-row"><div><div class="stock-name">${def.name}</div><div class="stock-ticker">${def.ticker}</div></div><div class="stock-price">${formatMoney(st.price)}</div><div class="stock-change ${cls}">${change>=0?'+':''}${pct.toFixed(1)}%</div><div class="stock-shares">${st.shares}</div><div class="stock-actions"><button class="btn-buy" onclick="tradeStock('${def.id}',true)">Buy</button><button class="btn-sell" onclick="tradeStock('${def.id}',false)">Sell</button></div></div>`;}).join('');
+        const sectorTag=def.sector==='aerospace'?' <span style="color:var(--space-bright);font-size:0.65rem">AERO</span>':'';
+        return`<div class="stock-row"><div><div class="stock-name">${def.name}${sectorTag}</div><div class="stock-ticker">${def.ticker}</div></div><div class="stock-price">${formatMoney(st.price)}</div><div class="stock-change ${cls}">${change>=0?'+':''}${pct.toFixed(1)}%</div><div class="stock-shares">${st.shares}</div><div class="stock-actions"><button class="btn-buy" onclick="tradeStock('${def.id}',true)">Buy</button><button class="btn-sell" onclick="tradeStock('${def.id}',false)">Sell</button></div></div>`;}).join('');
     }
-    let prodChart,demandChart,cashChart,portChart;
+    function renderMissionUI(){
+      const list=document.getElementById('missions-list');if(!list)return;
+      list.innerHTML=MISSIONS.map(m=>{
+        const locked=state.lifetimeSales<m.reqSold;
+        const can=canLaunch(m);
+        return`<div class="mission-card ${locked?'locked':''}">
+          <div class="mission-title"><span>${m.name}</span><span style="font-family:var(--mono);font-size:0.75rem;color:var(--gold)">${formatMoney(m.cost)}</span></div>
+          <div class="mission-desc">${m.desc}</div>
+          <div class="mission-stats">Mat: ${m.materials} · Diff: ${Math.round(m.difficulty*100)}% · Reward: ${formatMoney(m.reward)}</div>
+          ${locked?`<div class="locked-hint">Requires ${formatMoney(m.reqSold)} lifetime sales</div>`:
+          `<button class="buy-btn" style="margin-top:6px" ${can&&!state.currentMission?'':'disabled'} onclick="startMission('${m.id}')">${state.currentMission?'In flight...':(can?'Launch':'Insufficient resources')}</button>`}
+        </div>`;
+      }).join('');
+      document.getElementById('auto-cool-status').textContent=state.autoCool?'ON':'OFF';
+      document.getElementById('auto-guide-status').textContent=state.autoGuide?'ON':'OFF';
+      document.getElementById('autopilot-status').textContent=state.autopilot?'ON':'OFF';
+      document.getElementById('missions-flown').textContent=state.missionsFlown;
+      document.getElementById('success-rate').textContent=state.missionsFlown>0?Math.round(state.missionsSuccess/state.missionsFlown*100)+'%':'—';
+      document.getElementById('buy-autocool').disabled=state.autoCool||state.cash<2500;
+      document.getElementById('buy-autoguide').disabled=state.autoGuide||state.cash<8000;
+      document.getElementById('buy-autopilot').disabled=state.autopilot||state.cash<35000;
+    }
+    function renderColonies(){
+      const list=document.getElementById('colonies-list');if(!list)return;
+      list.innerHTML=COLONIES.map(c=>{
+        const col=state.colonies[c.id];
+        if(!col.owned) return`<div class="colony-card" style="opacity:0.45"><div class="colony-name">${c.icon} ${c.name}</div><div class="hint">Locked — complete required mission</div></div>`;
+        const rate=c.baseRate*col.progress*col.rateMult*state.prestigeMult;
+        return`<div class="colony-card">
+          <div style="display:flex;justify-content:space-between"><span class="colony-name">${c.icon} ${c.name}</span><span class="colony-pct">${Math.round(col.progress*100)}% converted</span></div>
+          <div class="colony-bar"><div class="colony-bar-fill" style="width:${col.progress*100}%"></div></div>
+          <div style="font-size:0.78rem;color:var(--text-dim)">${c.desc}</div>
+          <div style="font-family:var(--mono);font-size:0.8rem;color:var(--space-bright);margin-top:4px">${formatNum(rate,1)} pencils/s</div>
+        </div>`;
+      }).join('');
+    }
+
+    let prodChart,demandChart,cashChart,portChart,aeroChart,successChart,massChart,conversionChart;
     function initCharts(){
       const opts={responsive:true,maintainAspectRatio:false,animation:{duration:250,easing:'easeOutQuart'},plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#9a8d7a',font:{size:9}},grid:{color:'rgba(58,51,43,0.35)'}}},elements:{point:{radius:0},line:{tension:0.35,borderWidth:2}}};
       prodChart=new Chart(document.getElementById('prod-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#6f9b6a',backgroundColor:'rgba(111,155,106,0.12)',fill:true}]},options:opts});
       demandChart=new Chart(document.getElementById('demand-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#5a8a8a',backgroundColor:'rgba(90,138,138,0.12)',fill:true}]},options:opts});
       cashChart=new Chart(document.getElementById('cash-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#e07a3d',backgroundColor:'rgba(224,122,61,0.12)',fill:true}]},options:opts});
       portChart=new Chart(document.getElementById('port-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#9b7b9b',backgroundColor:'rgba(155,123,155,0.12)',fill:true}]},options:opts});
+      aeroChart=new Chart(document.getElementById('aero-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#7ba3d4',backgroundColor:'rgba(74,111,165,0.15)',fill:true}]},options:opts});
+      successChart=new Chart(document.getElementById('success-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#9bc892',backgroundColor:'rgba(111,155,106,0.12)',fill:true}]},options:opts});
+      massChart=new Chart(document.getElementById('mass-chart'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#9b7b9b',backgroundColor:'rgba(155,123,155,0.12)',fill:true}]},options:opts});
+      conversionChart=new Chart(document.getElementById('conversion-chart'),{type:'bar',data:{labels:COLONIES.map(c=>c.name),datasets:[{data:COLONIES.map(()=>0),backgroundColor:'#4a6fa5'}]},options:{...opts,scales:{x:{ticks:{color:'#9a8d7a',font:{size:10}}},y:{ticks:{color:'#9a8d7a',font:{size:9}},grid:{color:'rgba(58,51,43,0.35)'},max:100}}}});
     }
     function updateCharts(){
       if(!prodChart)return;const h=state.history;
@@ -1177,8 +1148,16 @@
       demandChart.data.labels=h.labels;demandChart.data.datasets[0].data=h.demand;demandChart.update('none');
       cashChart.data.labels=h.labels;cashChart.data.datasets[0].data=h.cash;cashChart.update('none');
       portChart.data.labels=h.labels;portChart.data.datasets[0].data=h.port;portChart.update('none');
+      if(aeroChart){aeroChart.data.labels=h.labels;aeroChart.data.datasets[0].data=h.aero;aeroChart.update('none');}
+      if(successChart){successChart.data.labels=h.labels;successChart.data.datasets[0].data=h.success;successChart.update('none');}
+      if(massChart){massChart.data.labels=h.labels;massChart.data.datasets[0].data=h.mass;massChart.update('none');}
+      if(conversionChart){
+        conversionChart.data.datasets[0].data=COLONIES.map(c=>Math.round((state.colonies[c.id].progress||0)*100));
+        conversionChart.update('none');
+      }
     }
-    function renderAll(){renderResources();renderDemandUI();renderMachines();renderUpgrades();renderMarketing();renderSupply();renderStocks();renderLog();}
+    function renderAll(){renderResources();renderDemandUI();renderMachines();renderUpgrades();renderMarketing();renderSupply();renderStocks();renderLog();renderMissionUI();renderColonies();renderMissionLog();}
+
     function saveGame(){state.lastTick=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
     function loadGame(){
       try{
@@ -1190,10 +1169,13 @@
         MACHINES.forEach(m=>{if(state.machines[m.id]===undefined)state.machines[m.id]=0;});
         MARKETING.forEach(m=>{if(state.marketing[m.id]===undefined)state.marketing[m.id]=0;});
         STOCKS_DEF.forEach(s=>{if(!state.stocks[s.id])state.stocks[s.id]={price:s.base,shares:0,history:[s.base]};});
-        if(!state.history)state.history={prod:[],demand:[],cash:[],port:[],labels:[]};
+        COLONIES.forEach(c=>{if(!state.colonies[c.id])state.colonies[c.id]={owned:false,progress:0,rateMult:1};});
+        if(!state.history)state.history={prod:[],demand:[],cash:[],port:[],success:[],mass:[],aero:[],labels:[]};
+        if(state.spaceUnlocked){document.getElementById('nav-mission').classList.remove('locked');document.getElementById('space-res').style.display='flex';}
+        if(state.cosmosUnlocked){document.getElementById('nav-cosmos').classList.remove('locked');document.getElementById('space-charts').style.display='grid';}
         const elapsed=Math.min((Date.now()-(loaded.lastTick||Date.now()))/1000,state.offlineCapHours*3600);
         if(elapsed>15){
-          const rate=getTotalRate();let produced=Math.min(rate*elapsed*0.75,state.storage-state.pencils);produced=Math.max(0,produced);
+          const rate=getTotalRate()+getSpaceRate();let produced=Math.min(rate*elapsed*0.75,state.storage-state.pencils);produced=Math.max(0,produced);
           state.pencils+=produced;state.totalProduced+=produced;
           const sales=Math.min(state.pencils,getSalesRate()*elapsed*0.55);
           if(sales>0.1){const rev=sales*state.askingPrice*0.8;state.pencils-=sales;state.cash+=rev;state.lifetimeSales+=rev;state.totalSold+=sales;}
@@ -1203,12 +1185,14 @@
       }catch(e){localStorage.removeItem(SAVE_KEY);return false;}
     }
     function switchPanel(id){
+      if((id==='mission'&&!state.spaceUnlocked)||(id==='cosmos'&&!state.cosmosUnlocked)){toast('Division not yet authorized');return;}
       document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
       document.getElementById('panel-'+id)?.classList.add('active');
       document.querySelectorAll(`.nav-btn[data-panel="${id}"]`).forEach(b=>b.classList.add('active'));
       if(id==='machines')renderMachines();if(id==='upgrades')renderUpgrades();if(id==='marketing')renderMarketing();
       if(id==='supply')renderSupply();if(id==='market')renderStocks();if(id==='analytics')updateCharts();
+      if(id==='mission')renderMissionUI();if(id==='cosmos')renderColonies();
     }
     document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>switchPanel(btn.dataset.panel));});
     const mobileTabs=document.getElementById('mobile-tabs');
@@ -1232,6 +1216,7 @@
     if(!loaded){state.cash=45;state.pencils=0;state.materials=350;state.askingPrice=0.95;}
     setAskingPrice(state.askingPrice||0.95);initCharts();renderAll();requestAnimationFrame(gameLoop);
     logEvent('Factory online. Click the pencil and buy Local Ads early!');
+    if(state.spaceUnlocked) logEvent('Aerospace Division standing by.');
   </script>
 </body>
 </html>

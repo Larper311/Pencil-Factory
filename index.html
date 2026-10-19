@@ -400,6 +400,7 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 <p class="hint">Shortcut: press T, then P. Works when you are not typing in another field.</p>
 </div></div>
 <div class="toast" id="toast"></div>
+<script>
 const SAVE_KEY='pencilFactory_v6_space';
 const MACHINES=[
 {id:'worker',name:'Craftsman',icon:'👷',baseCost:18,baseRate:0.35,desc:'Hand crafts pencils.'},
@@ -882,6 +883,8 @@ if(!loaded){state.cash=45;state.pencils=0;state.materials=350;state.askingPrice=
 setAskingPrice(state.askingPrice||0.95);initCharts();renderAll();requestAnimationFrame(gameLoop);
 logEvent('Factory online. Click the pencil and buy Local Ads early!');
 if(state.spaceUnlocked)logEvent('Aerospace Division standing by.');
+</script>
+<script>
 (()=>{
 const $=i=>document.getElementById(i),R=(a,b)=>a+Math.random()*(b-a),F=n=>formatNum(n,1);
 const setH=(el,h)=>{if(el&&el._h!==h){el._h=h;el.innerHTML=h}};
@@ -983,7 +986,8 @@ setInterval(()=>{const r=megaRate();if(r>0){const n=r*.25,rev=n*state.askingPric
 renderAll();
 logEvent('Universe Update loaded: orbital map, candlesticks, megastructures & more!');
 })();
-  <style>
+</script>
+<style>
 #px-card{padding:12px}
 #px-stage{position:relative;height:min(68vh,660px);min-height:340px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#02030a;touch-action:none;user-select:none;-webkit-user-select:none}
 #px-stage:fullscreen{height:100vh;border-radius:0}
@@ -1590,3 +1594,5 @@ renderMissionUI();updFlights();updInfo();setCamBtn();
 requestAnimationFrame(frame);
 })();
 </script>
+</body>
+</html>

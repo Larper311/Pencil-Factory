@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pencil Factory — Universal Tycoon v7</title>
+<title>Pencil Factory — Universal Tycoon v8</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{--bg:#0f0e0c;--bg-panel:#181512;--bg-card:#221e19;--bg-elevated:#2a251f;--bg-hover:#322c25;--border:#3a332b;--border-light:#4a4238;--text:#f3ebe0;--text-dim:#9a8d7a;--text-muted:#6b5f50;--accent:#e07a3d;--accent-soft:#d4a574;--accent-glow:rgba(224,122,61,0.35);--sage:#6f9b6a;--sage-bright:#9bc892;--teal:#5a8a8a;--cream:#f5e6c8;--rose:#c47b6a;--gold:#d4b483;--purple:#9b7b9b;--blue:#6b8f9e;--space:#4a6fa5;--space-bright:#7ba3d4;--font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;--mono:'SF Mono','Fira Code','Consolas',monospace;--radius:14px;--shadow:0 10px 32px rgba(0,0,0,0.45)}
@@ -171,7 +171,7 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 .debug-actions{display:flex;gap:8px;align-items:center;margin-top:10px}
 .debug-actions .cool-btn{flex:1;margin-top:0}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-.px-canvas{width:100%;display:block;border-radius:12px;background:#05070f;border:1px solid var(--border)}
+.px-canvas{width:100%;display:block;border-radius:12px;background:#05070f;border:1px solid var(--border);cursor:crosshair}
 .px-tape{position:fixed;left:0;right:0;bottom:0;height:28px;background:#0b0c14;border-top:1px solid var(--border);overflow:hidden;z-index:90;font:600 .74rem var(--mono);display:flex;align-items:center}
 .px-tape-in{display:inline-block;white-space:nowrap;padding-left:100%;animation:pxs 90s linear infinite}
 @keyframes pxs{to{transform:translateX(-100%)}}
@@ -179,6 +179,10 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 .px-chip.on{border-color:var(--accent);color:var(--accent)}
 .px-ach{display:flex;gap:8px;align-items:center;padding:5px 0;font-size:.8rem;border-bottom:1px solid rgba(58,51,43,.4)}
 .px-ach.off{opacity:.35}
+.map-tooltip{position:absolute;pointer-events:none;background:rgba(15,14,20,0.92);border:1px solid var(--space);border-radius:8px;padding:8px 10px;font-size:0.78rem;z-index:50;max-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.5);display:none}
+.map-tooltip strong{color:var(--space-bright)}
+.active-missions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.active-mission-chip{background:var(--bg);border:1px solid var(--space);border-radius:20px;padding:4px 10px;font-size:0.72rem;font-family:var(--mono);color:var(--space-bright)}
 </style>
 </head>
 <body>
@@ -250,7 +254,7 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 </div>
 </div>
 <div class="panel" id="panel-machines"><h2>Machines</h2><p class="subtitle">Automate production. They only run when materials are available.</p><div class="grid-3" id="machines-grid"></div></div>
-<div class="panel" id="panel-upgrades"><h2>R&amp;D Lab</h2><p class="subtitle">Quality, speed, brand and efficiency upgrades.</p><div class="grid-2" id="upgrades-grid"></div></div>
+<div class="panel" id="panel-upgrades"><h2>R&amp;D Lab</h2><p class="subtitle">Quality, speed, brand and efficiency upgrades. Some unlock unique mechanics.</p><div class="grid-2" id="upgrades-grid"></div></div>
 <div class="panel" id="panel-marketing">
 <h2>Marketing &amp; Brand</h2>
 <p class="subtitle">This is how you grow demand. Start with Local Ads ($28).</p>
@@ -315,31 +319,42 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 </div>
 <div class="panel" id="panel-mission">
 <h2>Mission Control</h2>
-<p class="subtitle">Launch rockets. Early missions require manual thermal control and navigation calculations.</p>
+<p class="subtitle">Launch rockets. Multiple concurrent missions possible once you unlock Parallel Launch. Watch them fly on the Cosmos map!</p>
 <div class="space-banner" id="space-status">Aerospace Division: Online. Select a mission.</div>
+<div class="active-missions" id="active-missions"></div>
 <div class="grid-2">
 <div class="card"><h3>🚀 Available Missions</h3><div id="missions-list"></div></div>
 <div class="card"><h3>📡 Flight Systems</h3>
 <div class="material-row"><span>Auto-Cool</span><span id="auto-cool-status" style="font-family:var(--mono)">OFF</span></div>
 <div class="material-row"><span>Auto-Guidance</span><span id="auto-guide-status" style="font-family:var(--mono)">OFF</span></div>
 <div class="material-row"><span>Full Autopilot</span><span id="autopilot-status" style="font-family:var(--mono)">OFF</span></div>
+<div class="material-row"><span>Parallel Launches</span><span id="parallel-status" style="font-family:var(--mono)">1</span></div>
 <div class="material-row"><span>Missions Flown</span><span id="missions-flown" style="font-family:var(--mono)">0</span></div>
 <div class="material-row"><span>Success Rate</span><span id="success-rate" style="font-family:var(--mono)">—</span></div>
 <div class="actions-bar" style="margin-top:12px">
 <button class="secondary-btn" id="buy-autocool" onclick="buySpaceUpgrade('autoCool')">Auto-Cool ($2,500)</button>
 <button class="secondary-btn" id="buy-autoguide" onclick="buySpaceUpgrade('autoGuide')">Auto-Guidance ($8,000)</button>
 <button class="secondary-btn" id="buy-autopilot" onclick="buySpaceUpgrade('autopilot')">Full Autopilot ($35,000)</button>
+<button class="secondary-btn" id="buy-parallel" onclick="buySpaceUpgrade('parallel')">Parallel Bay ($75,000)</button>
 </div>
-<p class="hint">Automation lets you launch while managing the factory.</p>
+<p class="hint">Automation + parallel bays let you launch while managing the factory. Watch trajectories on the Cosmos map.</p>
 </div>
 </div>
 <div class="card" style="margin-top:12px"><h3>📜 Mission Log</h3><div class="event-log" id="mission-log" style="max-height:160px"></div></div>
 </div>
 <div class="panel" id="panel-cosmos">
 <h2>Cosmos — Penciliforming</h2>
-<p class="subtitle">Claim celestial bodies and convert their mass into pencils.</p>
-<div class="space-banner">Total mass converted: <strong id="total-mass">0</strong> tonnes · Space production: <strong id="cosmos-prod">0</strong>/s</div>
+<p class="subtitle">Claim celestial bodies and convert their mass into pencils. Click planets for info. Watch live missions!</p>
+<div class="space-banner">Total mass converted: <strong id="total-mass">0</strong> tonnes · Space production: <strong id="cosmos-prod">0</strong>/s · Active flights: <strong id="active-flight-count">0</strong></div>
+<div class="card" style="margin-bottom:12px;position:relative">
+<h3>🛰️ Live Solar System <span id="map-focus-label" style="margin-left:auto;font-size:0.75rem;color:var(--text-dim)"></span></h3>
+<canvas id="px-map" class="px-canvas" width="720" height="420"></canvas>
+<div class="map-tooltip" id="map-tooltip"></div>
+<p class="hint">Click a body to focus. Gold rings = conversion progress. Rockets follow realistic trajectories. Crash into Sun or wrong body = mission failure. Orbiters appear when purchased.</p>
+</div>
+<div class="card" style="margin-bottom:12px"><h3>🔥 Engines <span class="hint" style="margin-left:auto">lower mission risk & speed up transfers</span></h3><div id="px-eng"></div></div>
 <div id="colonies-list"></div>
+<div class="card" style="margin-top:12px"><h3>🏗️ Megastructures & Orbiters</h3><div id="px-mega"></div></div>
 <div class="card" style="margin-top:12px"><h3>Solar System Conversion</h3><div class="chart-container" style="height:220px"><canvas id="conversion-chart"></canvas></div></div>
 </div>
 <div class="panel" id="panel-office">
@@ -362,6 +377,7 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 <div style="font-family:var(--mono);margin-bottom:8px;font-size:0.86rem">Need: <strong id="prestige-req">$20,000</strong><br>Gain: <strong id="prestige-gain">+0.00×</strong></div>
 <button class="buy-btn" id="prestige-btn" style="max-width:200px;margin:0 auto;background:linear-gradient(180deg,var(--purple),#7a5a7a);color:#fff" disabled>Prestige</button>
 </div>
+<div class="card" style="margin-top:12px"><h3>🏆 Achievements <span id="px-achn" class="hint" style="margin-left:auto"></span></h3><div id="px-ach"></div></div>
 </div>
 </main>
 </div>
@@ -372,6 +388,7 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 <div style="font-family:var(--mono);font-size:0.85rem;margin-bottom:6px">Temp: <span id="thermal-temp">870</span> K</div>
 <button class="cool-btn" id="cool-btn">COOL ENGINE</button>
 <div class="telemetry" id="thermal-telemetry">T+00:00 — Thermal excursion detected</div>
+<canvas id="px-heat" width="380" height="70" style="width:100%;border-radius:8px;margin:6px 0"></canvas>
 </div></div>
 <div class="overlay" id="overlay-formula"><div class="overlay-box">
 <h3>📐 Navigation Calculation Required</h3>
@@ -400,8 +417,9 @@ body.space-era .brand-icon{background:linear-gradient(145deg,var(--space),#9c8ce
 <p class="hint">Shortcut: press T, then P. Works when you are not typing in another field.</p>
 </div></div>
 <div class="toast" id="toast"></div>
+<div class="px-tape"><span class="px-tape-in" id="px-tape-in"></span></div>
 <script>
-const SAVE_KEY='pencilFactory_v6_space';
+const SAVE_KEY='pencilFactory_v8_space';
 const MACHINES=[
 {id:'worker',name:'Craftsman',icon:'👷',baseCost:18,baseRate:0.35,desc:'Hand crafts pencils.'},
 {id:'extruder',name:'Graphite Extruder',icon:'🔧',baseCost:95,baseRate:1.4,desc:'Forms graphite cores.'},
@@ -431,7 +449,15 @@ const UPGRADES=[
 {id:'mat2',name:'Supplier Contract',icon:'📝',cost:3800,effect:'matSave',value:0.12,desc:'More savings.',once:true},
 {id:'storage1',name:'Bigger Warehouse',icon:'📦',cost:1400,effect:'storage',value:7000,desc:'+7,000 space.',once:false},
 {id:'storage2',name:'Mega Warehouse',icon:'🏗️',cost:18000,effect:'storage',value:30000,desc:'+30,000 space.',once:false},
-{id:'offline',name:'Night Shift',icon:'🌙',cost:1100,effect:'offlineCap',value:4,desc:'+4h offline.',once:true}];
+{id:'offline',name:'Night Shift',icon:'🌙',cost:1100,effect:'offlineCap',value:4,desc:'+4h offline.',once:true},
+// Unique new upgrades
+{id:'quantum',name:'Quantum Graphite',icon:'⚛️',cost:85000,effect:'quality',value:0.9,desc:'Unstable but legendary cores. Massive fair-value boost.',once:true},
+{id:'ai',name:'AI Overseer',icon:'🤖',cost:120000,effect:'rateMult',value:0.55,desc:'Self-optimizing lines. +55% machine output.',once:true},
+{id:'viral',name:'Viral Challenge',icon:'📱',cost:45000,effect:'brand',value:0.7,desc:'#PencilChallenge goes global.',once:true},
+{id:'timewarp',name:'Time-Dilation Lab',icon:'⏳',cost:280000,effect:'offlineCap',value:12,desc:'+12h offline progress.',once:true},
+{id:'nanites',name:'Self-Repair Nanites',icon:'🔬',cost:95000,effect:'matSave',value:0.2,desc:'Machines waste almost nothing.',once:true},
+{id:'prestigeBoost',name:'Legacy Protocols',icon:'📜',cost:500000,effect:'prestigeMult',value:0.15,desc:'Permanent +0.15× to prestige multiplier on next reset.',once:true}
+];
 const MARKETING=[
 {id:'ads',name:'Local Ads',icon:'📰',baseCost:28,costMult:1.45,boost:0.18,desc:'Flyers & local papers. Great early.'},
 {id:'logo',name:'Logo Design',icon:'🎨',baseCost:70,costMult:1.5,boost:0.22,desc:'Professional logo. Strong signal.'},
@@ -447,21 +473,53 @@ const STOCKS_DEF=[
 {id:'lead',ticker:'LTR',name:'LeadTech',base:48,vol:0.032,sens:0.07,sector:'tech'},
 {id:'aero',ticker:'AXP',name:'AeroPencil',base:28,vol:0.04,sens:0.35,sector:'aerospace'},
 {id:'orbit',ticker:'ORB',name:'OrbitalGraphite',base:65,vol:0.045,sens:0.4,sector:'aerospace'},
-{id:'lunar',ticker:'LNR',name:'LunarResources',base:120,vol:0.05,sens:0.5,sector:'aerospace'}];
+{id:'lunar',ticker:'LNR',name:'LunarResources',base:120,vol:0.05,sens:0.5,sector:'aerospace'},
+{id:'pncl',ticker:'PNCL',name:'Your Company',base:40,vol:0.03,sens:0,sector:'self'},
+{id:'dyson',ticker:'DYS',name:'DysonDynamics',base:260,vol:0.055,sens:0.55,sector:'aerospace'},
+{id:'warp',ticker:'WRP',name:'WarpDriveCo',base:600,vol:0.065,sens:0.6,sector:'aerospace'}];
 const MISSIONS=[
-{id:'leo',name:'LEO Pencil Package',desc:'Low Earth Orbit delivery demonstration. First step.',cost:1200,materials:80,difficulty:0.15,reward:3500,unlockColony:null,reqSold:0,formula:null},
-{id:'lunar',name:'Lunar Sample Return',desc:'Soft land on the Moon, collect regolith, return graphite-rich samples.',cost:8500,materials:400,difficulty:0.28,reward:22000,unlockColony:'moon',reqSold:5e5,formula:'hohmann'},
-{id:'mars',name:'Mars Recon Probe',desc:'Hohmann transfer to Mars. Deploy spectrometer and ISRU test.',cost:45000,materials:1800,difficulty:0.38,reward:95000,unlockColony:'mars',reqSold:3e6,formula:'deltav'},
-{id:'europa',name:'Europa Ice Core',desc:'Jupiter system. Extract water ice for future propellant.',cost:180000,materials:6000,difficulty:0.48,reward:320000,unlockColony:'europa',reqSold:2e7,formula:'phase'},
-{id:'titan',name:'Titan Atmosphere',desc:'Saturn system. Sample organics and test long-range comms.',cost:650000,materials:15000,difficulty:0.55,reward:1.1e6,unlockColony:'titan',reqSold:8e7,formula:null},
-{id:'kuiper',name:'Kuiper Outpost',desc:'Establish automated pencil factory beyond Neptune.',cost:2.5e6,materials:40000,difficulty:0.62,reward:4.5e6,unlockColony:'kuiper',reqSold:3e8,formula:null}];
+{id:'leo',name:'LEO Pencil Package',desc:'Low Earth Orbit delivery demonstration. First step.',cost:1200,materials:80,difficulty:0.12,reward:3500,unlockColony:null,reqSold:0,formula:null,duration:28,target:'earth'},
+{id:'lunar',name:'Lunar Sample Return',desc:'Soft land on the Moon, collect regolith, return graphite-rich samples.',cost:8500,materials:400,difficulty:0.25,reward:22000,unlockColony:'moon',reqSold:5e5,formula:'hohmann',duration:45,target:'moon'},
+{id:'mars',name:'Mars Recon Probe',desc:'Hohmann transfer to Mars. Deploy spectrometer and ISRU test.',cost:45000,materials:1800,difficulty:0.35,reward:95000,unlockColony:'mars',reqSold:3e6,formula:'deltav',duration:55,target:'mars'},
+{id:'europa',name:'Europa Ice Core',desc:'Jupiter system. Extract water ice for future propellant.',cost:180000,materials:6000,difficulty:0.45,reward:320000,unlockColony:'europa',reqSold:2e7,formula:'phase',duration:65,target:'europa'},
+{id:'titan',name:'Titan Atmosphere',desc:'Saturn system. Sample organics and test long-range comms.',cost:650000,materials:15000,difficulty:0.52,reward:1.1e6,unlockColony:'titan',reqSold:8e7,formula:null,duration:70,target:'titan'},
+{id:'kuiper',name:'Kuiper Outpost',desc:'Establish automated pencil factory beyond Neptune.',cost:2.5e6,materials:40000,difficulty:0.58,reward:4.5e6,unlockColony:'kuiper',reqSold:3e8,formula:null,duration:80,target:'kuiper'},
+{id:'venus',name:'Venus Cloud Drop',desc:'Aerobrake into the clouds and seed floating factories.',cost:6e6,materials:20000,difficulty:0.55,reward:1.1e7,unlockColony:'venus',reqSold:1e9,formula:null,duration:60,target:'venus'},
+{id:'ceres',name:'Ceres Prospector',desc:'Land on the dwarf planet and tap the graphite veins.',cost:2.4e7,materials:40000,difficulty:0.6,reward:4.6e7,unlockColony:'ceres',reqSold:4e9,formula:null,duration:50,target:'ceres'},
+{id:'pluto',name:'Pluto Flyby Factory',desc:'Build a robotic works at the edge of the Sun’s reach.',cost:9e7,materials:80000,difficulty:0.65,reward:1.8e8,unlockColony:'pluto',reqSold:1.5e10,formula:null,duration:90,target:'pluto'},
+{id:'oort',name:'Oort Cloud Armada',desc:'Launch the swarm that converts comets into pencils.',cost:4e8,materials:150000,difficulty:0.7,reward:8e8,unlockColony:'oort',reqSold:6e10,formula:null,duration:110,target:'oort'}
+];
 const COLONIES=[
 {id:'moon',name:'Luna Outpost',icon:'🌕',baseRate:12,mass:7.3e10,desc:'Near-side factory. First off-world production.'},
 {id:'mars',name:'Mars Colony',icon:'🔴',baseRate:85,mass:6.4e11,desc:'ISRU-enabled. Self-sufficient graphite extraction.'},
 {id:'europa',name:'Europa Station',icon:'❄️',baseRate:320,mass:4.8e10,desc:'Ice mining + radiation-hardened lines.'},
 {id:'titan',name:'Titan Complex',icon:'🟠',baseRate:1100,mass:1.3e11,desc:'Hydrocarbon feedstock conversion.'},
-{id:'kuiper',name:'Kuiper Swarm',icon:'☄️',baseRate:4500,mass:1e12,desc:'Distributed autonomous factories.'}];
-let state={cash:45,pencils:0,materials:350,clickPower:1,quality:1.0,rateMult:1,brand:1.0,marketing:{},matSave:0,storage:3000,prestigeLevel:0,prestigeMult:1,lifetimeSales:0,totalProduced:0,lifetimePencilsMade:0,totalSold:0,machines:{},upgradesOwned:{},stocks:{},askingPrice:0.95,offlineCapHours:8,lastTick:Date.now(),history:{prod:[],demand:[],cash:[],port:[],success:[],mass:[],aero:[],labels:[]},log:[],clearanceActive:false,clearanceTimer:0,spaceUnlocked:false,cosmosUnlocked:false,autoCool:false,autoGuide:false,autopilot:false,missionsFlown:0,missionsSuccess:0,missionLog:[],colonies:{},totalMassConverted:0,currentMission:null,flightPhase:null};
+{id:'kuiper',name:'Kuiper Swarm',icon:'☄️',baseRate:4500,mass:1e12,desc:'Distributed autonomous factories.'},
+{id:'venus',name:'Venus Cloud City',icon:'🟡',baseRate:9000,mass:4.9e12,desc:'Floating pencil habitats in the clouds.'},
+{id:'ceres',name:'Ceres Mines',icon:'⚪',baseRate:16000,mass:9e8,desc:'Asteroid-belt graphite hub.'},
+{id:'pluto',name:'Pluto Works',icon:'🤍',baseRate:30000,mass:1.3e10,desc:'A frozen heart that sharpens.'},
+{id:'oort',name:'Oort Cloud Fleet',icon:'🌌',baseRate:75000,mass:1e13,desc:'A trillion comets turned to lead.'}
+];
+const MEGA=[
+{id:'foundry',n:'Orbital Pencil Foundry',i:'🛰️',base:2.5e5,rate:400,orbiter:true},
+{id:'dyson',n:'Dyson Swarm',i:'☀️',base:5e7,rate:3e4,orbiter:false},
+{id:'matrioshka',n:'Matrioshka Brain',i:'🧠',base:5e9,rate:2.5e6,orbiter:false},
+{id:'sing',n:'Pencil Singularity',i:'🕳️',base:2e12,rate:4e8,orbiter:false},
+{id:'station',n:'Lagrange Station',i:'🏗️',base:1.2e6,rate:1800,orbiter:true},
+{id:'ring',n:'Orbital Ring',i:'💍',base:8e7,rate:45000,orbiter:true}
+];
+const ENG=[{n:'Chemical Rockets',c:0,b:0},{n:'Ion Drive',c:1.5e5,b:.12},{n:'Fusion Torch',c:4e6,b:.25},{n:'Antimatter Core',c:3e8,b:.4}];
+let state={
+cash:45,pencils:0,materials:350,clickPower:1,quality:1.0,rateMult:1,brand:1.0,marketing:{},matSave:0,storage:3000,
+prestigeLevel:0,prestigeMult:1,lifetimeSales:0,totalProduced:0,lifetimePencilsMade:0,totalSold:0,
+machines:{},upgradesOwned:{},stocks:{},askingPrice:0.95,offlineCapHours:8,lastTick:Date.now(),
+history:{prod:[],demand:[],cash:[],port:[],success:[],mass:[],aero:[],labels:[]},log:[],
+clearanceActive:false,clearanceTimer:0,spaceUnlocked:false,cosmosUnlocked:false,
+autoCool:false,autoGuide:false,autopilot:false,parallelSlots:1,
+missionsFlown:0,missionsSuccess:0,missionLog:[],colonies:{},totalMassConverted:0,
+activeMissions:[], // array of flying missions
+engine:0, x:{ach:{},mega:{},c:{},sel:'aero'}
+};
 MACHINES.forEach(m=>state.machines[m.id]=0);
 MARKETING.forEach(m=>state.marketing[m.id]=0);
 STOCKS_DEF.forEach(s=>{state.stocks[s.id]={price:s.base,shares:0,history:[s.base]};});
@@ -479,7 +537,8 @@ function animateValue(id,val,fmt){const el=document.getElementById(id);if(!el)re
 function getMachineCost(m){return Math.floor(m.baseCost*Math.pow(1.14,state.machines[m.id]||0));}
 function getMachineRate(m){return m.baseRate*(state.machines[m.id]||0)*state.rateMult*state.prestigeMult;}
 function getTotalRate(){return MACHINES.reduce((s,m)=>s+getMachineRate(m),0);}
-function getSpaceRate(){let r=0;COLONIES.forEach(c=>{const col=state.colonies[c.id];if(col.owned)r+=c.baseRate*col.rateMult*col.progress*state.prestigeMult;});return r;}
+function getSpaceRate(){let r=0;COLONIES.forEach(c=>{const col=state.colonies[c.id];if(col.owned)r+=c.baseRate*col.rateMult*col.progress*state.prestigeMult;});r+=megaRate();return r;}
+function megaRate(){return MEGA.reduce((s,m)=>s+m.rate*(state.x.mega[m.id]||0),0)*state.prestigeMult;}
 function getUnitMaterialCost(){const base=0.07+(state.quality-1)*0.16;return Math.max(0.025,base*(1-state.matSave));}
 function getPerceivedValue(){return 0.82*state.quality*(0.72+state.brand*0.42)*(1+state.prestigeLevel*0.02);}
 function getMarketingBoost(){let t=0;MARKETING.forEach(m=>{t+=(state.marketing[m.id]||0)*m.boost;});return t;}
@@ -492,37 +551,98 @@ function getNextPrestigeReq(){return 20000*Math.pow(2.7,state.prestigeLevel);}
 function checkSpaceUnlocks(){
 if(!state.spaceUnlocked&&state.lifetimeSales>=80000){state.spaceUnlocked=true;document.body.classList.add('space-era');document.getElementById('nav-mission').classList.remove('locked');document.getElementById('space-res').style.display='flex';logEvent('Aerospace Division authorized. Mission Control online.');toast('🚀 Aerospace Division unlocked!');document.getElementById('brand-name').textContent='Pencil Aerospace';}
 if(!state.cosmosUnlocked&&state.missionsSuccess>=2){state.cosmosUnlocked=true;document.getElementById('nav-cosmos').classList.remove('locked');document.getElementById('space-charts').style.display='grid';logEvent('Cosmos Division activated. Planetary conversion authorized.');toast('🌌 Cosmos panel unlocked!');}
-if(state.lifetimeSales>15000&&state.lifetimeSales<80000&&Math.random()<0.002){const msgs=['Government inquiry: vacuum-rated pencils?','Aerospace firm requests graphite samples.','Internal memo: orbital delivery feasibility study begun.'];logEvent(msgs[Math.floor(Math.random()*msgs.length)]);}
 }
-function buySpaceUpgrade(type){const costs={autoCool:2500,autoGuide:8000,autopilot:35000};if(state[type]){toast('Already owned');return;}if(state.cash<costs[type]){toast('Need '+formatMoney(costs[type]));return;}state.cash-=costs[type];state[type]=true;logEvent(`Purchased ${type}`);toast(`${type} online`);renderMissionUI();}
-function canLaunch(m){return state.cash>=m.cost&&state.materials>=m.materials&&state.lifetimeSales>=m.reqSold&&!state.currentMission;}
+function buySpaceUpgrade(type){
+const costs={autoCool:2500,autoGuide:8000,autopilot:35000,parallel:75000};
+if(type==='parallel'){
+if(state.parallelSlots>=4){toast('Max parallel bays');return;}
+if(state.cash<costs.parallel){toast('Need '+formatMoney(costs.parallel));return;}
+state.cash-=costs.parallel;state.parallelSlots++;logEvent('Parallel launch bay installed');toast('Parallel slots: '+state.parallelSlots);renderMissionUI();return;
+}
+if(state[type]){toast('Already owned');return;}if(state.cash<costs[type]){toast('Need '+formatMoney(costs[type]));return;}state.cash-=costs[type];state[type]=true;logEvent(`Purchased ${type}`);toast(`${type} online`);renderMissionUI();
+}
+function canLaunch(m){return state.cash>=m.cost&&state.materials>=m.materials&&state.lifetimeSales>=m.reqSold&&state.activeMissions.length<state.parallelSlots;}
+function generateTrajectory(targetId, duration){
+// Generate a realistic-ish curved path from Earth to target
+const pts=[];
+const steps=Math.max(40,Math.floor(duration*1.8));
+const start={x:0,y:0}; // relative
+// target orbital radius approx
+const radii={earth:105,moon:105,venus:70,mars:140,ceres:170,europa:205,titan:240,pluto:270,kuiper:300,oort:330};
+const r=radii[targetId]||140;
+const angleOffset=Math.random()*Math.PI*2;
+for(let i=0;i<=steps;i++){
+const t=i/steps;
+// Hohmann-like: start near Earth, rise, then coast, then approach
+const phase=t<0.15? t/0.15 : (t>0.85?(t-0.85)/0.15:1);
+let rad;
+if(t<0.2) rad=105 + (r-105)*Math.pow(t/0.2,1.4);
+else if(t>0.8) rad=r - (r-105)*(1-t)/0.2 *0.3;
+else rad=r*0.92 + Math.sin((t-0.2)*Math.PI*1.8)*r*0.08;
+const ang=angleOffset + t*Math.PI*1.6 + Math.sin(t*4)*0.15;
+const x=Math.cos(ang)*rad;
+const y=Math.sin(ang)*rad*0.52; // elliptical projection
+// add some transfer eccentricity
+const ecc=Math.sin(t*Math.PI)*22;
+pts.push({x:x+Math.cos(ang+1.2)*ecc*0.3, y:y+Math.sin(ang+0.7)*ecc*0.25, t});
+}
+return pts;
+}
 function startMission(id){
 const m=MISSIONS.find(x=>x.id===id);if(!m||!canLaunch(m))return;
-state.cash-=m.cost;state.materials-=m.materials;state.currentMission={...m,riskBonus:0};
-missionLog(`Launch sequence initiated: ${m.name}`);toast('Launch sequence started');
-if(state.autopilot){setTimeout(()=>resolveMission(Math.random()>m.difficulty*0.55),1800);return;}
-if(m.formula&&!state.autoGuide){showFormula(m);}else{beginThermalOrResolve(m);}
+state.cash-=m.cost;state.materials-=m.materials;
+const riskBonus=0;
+const traj=generateTrajectory(m.target||'mars', m.duration||50);
+const flight={
+...m,
+id:id+'_'+Date.now(),
+riskBonus,
+progress:0,
+duration:m.duration||50,
+traj,
+pathIndex:0,
+pos:{x:0,y:0},
+status:'flying',
+startTime:performance.now()
+};
+// Apply engine risk reduction
+if(state.engine>0) flight.riskBonus-=ENG[state.engine].b*0.5;
+state.activeMissions.push(flight);
+missionLog(`Launch sequence initiated: ${m.name}`);
+toast('🚀 '+m.name+' launched!');
+if(state.autopilot){
+// still show on map but auto-resolve later
+}else if(m.formula&&!state.autoGuide){
+showFormula(m,flight);
+}else{
+beginThermalOrResolve(m,flight);
 }
-function showFormula(m){
+renderMissionUI();
+}
+function showFormula(m,flight){
 const overlay=document.getElementById('overlay-formula'),prompt=document.getElementById('formula-prompt'),consts=document.getElementById('formula-constants'),answer=document.getElementById('formula-answer');
-answer.value='';let correct=0,unit='';
-if(m.formula==='hohmann'){prompt.textContent='Hohmann transfer to lunar distance (~60 Earth radii). Compute approximate semi-major axis of the transfer ellipse (Earth radii).';consts.textContent='r_earth = 1 RE\nr_moon ≈ 60 RE\na_transfer = (r1 + r2) / 2';correct=30.5;unit='RE';}
-else if(m.formula==='deltav'){prompt.textContent='Approximate Δv for Mars Hohmann (km/s). Typical value is near 5.5–6.0 km/s total for the two burns.';consts.textContent='Earth orbital v ≈ 29.8 km/s\nMars orbital v ≈ 24.1 km/s\nTypical total Δv ≈ 5.7 km/s';correct=5.7;unit='km/s';}
-else if(m.formula==='phase'){prompt.textContent='Ideal phase angle for Earth–Mars transfer is approximately 44°. Enter the phase angle in degrees.';consts.textContent='Hohmann to Mars synodic geometry\nIdeal lead angle ≈ 44°';correct=44;unit='°';}
-overlay.dataset.correct=correct;overlay.dataset.unit=unit;overlay.classList.add('show');
+answer.value='';let correct=0;
+if(m.formula==='hohmann'){prompt.textContent='Hohmann transfer to lunar distance (~60 Earth radii). Compute approximate semi-major axis of the transfer ellipse (Earth radii).';consts.textContent='r_earth = 1 RE\nr_moon ≈ 60 RE\na_transfer = (r1 + r2) / 2';correct=30.5;}
+else if(m.formula==='deltav'){prompt.textContent='Approximate Δv for Mars Hohmann (km/s). Typical value is near 5.5–6.0 km/s total for the two burns.';consts.textContent='Earth orbital v ≈ 29.8 km/s\nMars orbital v ≈ 24.1 km/s\nTypical total Δv ≈ 5.7 km/s';correct=5.7;}
+else if(m.formula==='phase'){prompt.textContent='Ideal phase angle for Earth–Mars transfer is approximately 44°. Enter the phase angle in degrees.';consts.textContent='Hohmann to Mars synodic geometry\nIdeal lead angle ≈ 44°';correct=44;}
+overlay.dataset.correct=correct;overlay.classList.add('show');
 document.getElementById('formula-submit').onclick=()=>{
 const val=parseFloat(answer.value);const diff=Math.abs(val-correct)/Math.max(1,Math.abs(correct));
 if(diff<0.12){missionLog('Navigation solution accepted. Trajectory locked.');toast('Navigation OK');}
-else{state.currentMission.riskBonus+=0.18;missionLog('Navigation error — elevated risk.');toast('Imprecise solution — higher risk');}
-overlay.classList.remove('show');beginThermalOrResolve(m);};
-document.getElementById('formula-skip').onclick=()=>{state.currentMission.riskBonus+=0.25;missionLog('Navigation skipped — risk increased.');overlay.classList.remove('show');beginThermalOrResolve(m);};
+else{flight.riskBonus+=0.18;missionLog('Navigation error — elevated risk.');toast('Imprecise solution — higher risk');}
+overlay.classList.remove('show');beginThermalOrResolve(m,flight);};
+document.getElementById('formula-skip').onclick=()=>{flight.riskBonus+=0.25;missionLog('Navigation skipped — risk increased.');overlay.classList.remove('show');beginThermalOrResolve(m,flight);};
 }
-function beginThermalOrResolve(m){
-if(state.autoCool){setTimeout(()=>resolveMission(Math.random()>(m.difficulty+(state.currentMission.riskBonus||0))*0.7),1200);}
-else{startThermalMinigame(m);}
+function beginThermalOrResolve(m,flight){
+if(state.autoCool||state.autopilot){
+// no minigame, just let it fly
+}else{
+startThermalMinigame(m,flight);
 }
-let thermalInterval=null,thermalTemp=700,thermalClicks=0;
-function startThermalMinigame(m){
+}
+let thermalInterval=null,thermalTemp=700,thermalClicks=0,thermalFlight=null;
+function startThermalMinigame(m,flight){
+thermalFlight=flight;
 const overlay=document.getElementById('overlay-thermal'),bar=document.getElementById('thermal-bar'),tempEl=document.getElementById('thermal-temp'),tel=document.getElementById('thermal-telemetry');
 thermalTemp=720+Math.random()*80;thermalClicks=0;
 tel.textContent=`T+00:00 — Thermal excursion at ${Math.round(thermalTemp)} K`;
@@ -538,26 +658,37 @@ updateThermalUI();
 let t=0;
 thermalInterval=setInterval(()=>{
 t+=0.1;thermalTemp+=4.5+Math.random()*3.5;
-if(thermalTemp>1100){clearInterval(thermalInterval);overlay.classList.remove('show');resolveMission(false);return;}
+if(thermalTemp>1100){clearInterval(thermalInterval);overlay.classList.remove('show');resolveMission(flight,false);return;}
 updateThermalUI();
-if(t>12||(thermalTemp<620&&thermalClicks>8)){clearInterval(thermalInterval);overlay.classList.remove('show');const successChance=1-(m.difficulty+(state.currentMission.riskBonus||0))*0.65;resolveMission(Math.random()<successChance);}
+if(t>12||(thermalTemp<620&&thermalClicks>8)){clearInterval(thermalInterval);overlay.classList.remove('show');const successChance=1-(m.difficulty+(flight.riskBonus||0))*0.65;resolveMission(flight,Math.random()<successChance);}
 },100);
 }
-function resolveMission(success){
-const m=state.currentMission;if(!m)return;
+function resolveMission(flight,success){
+if(!flight||flight.status!=='flying')return;
+flight.status=success?'success':'fail';
 state.missionsFlown++;
+const m=MISSIONS.find(x=>x.id===flight.id.split('_')[0])||flight;
 if(success){
 state.missionsSuccess++;state.cash+=m.reward;state.lifetimeSales+=m.reward*0.3;
 missionLog(`SUCCESS — ${m.name}. +${formatMoney(m.reward)}`);logEvent(`Mission success: ${m.name}`);
-['aero','orbit','lunar'].forEach(id=>{if(state.stocks[id])state.stocks[id].price*=1.04+Math.random()*0.06;});
-if(m.unlockColony&&!state.colonies[m.unlockColony].owned){state.colonies[m.unlockColony].owned=true;state.colonies[m.unlockColony].progress=0.05;missionLog(`Colony established: ${COLONIES.find(c=>c.id===m.unlockColony).name}`);toast('Colony founded!');checkSpaceUnlocks();}
+['aero','orbit','lunar','dyson','warp'].forEach(id=>{if(state.stocks[id])state.stocks[id].price*=1.04+Math.random()*0.06;});
+if(m.unlockColony&&state.colonies[m.unlockColony]&&!state.colonies[m.unlockColony].owned){
+state.colonies[m.unlockColony].owned=true;state.colonies[m.unlockColony].progress=0.05;
+missionLog(`Colony established: ${COLONIES.find(c=>c.id===m.unlockColony).name}`);
+toast('Colony founded!');checkSpaceUnlocks();
+}
 showResult(true,m);
 }else{
 missionLog(`FAILURE — ${m.name}. Vehicle lost.`);logEvent(`Mission failed: ${m.name}`);
-['aero','orbit','lunar'].forEach(id=>{if(state.stocks[id])state.stocks[id].price*=0.92+Math.random()*0.04;});
+['aero','orbit','lunar','dyson','warp'].forEach(id=>{if(state.stocks[id])state.stocks[id].price*=0.92+Math.random()*0.04;});
 showResult(false,m);
 }
-state.currentMission=null;renderMissionUI();renderResources();renderStocks();
+// remove after short delay so player can see impact
+setTimeout(()=>{
+state.activeMissions=state.activeMissions.filter(f=>f.id!==flight.id);
+renderMissionUI();
+},1800);
+renderResources();renderStocks();
 }
 function showResult(success,m){
 const overlay=document.getElementById('overlay-result'),box=document.getElementById('result-box'),title=document.getElementById('result-title'),desc=document.getElementById('result-desc');
@@ -601,6 +732,7 @@ if(u.effect==='brand')state.brand+=u.value;
 if(u.effect==='matSave')state.matSave=Math.min(0.5,state.matSave+u.value);
 if(u.effect==='storage')state.storage+=u.value;
 if(u.effect==='offlineCap')state.offlineCapHours+=u.value;
+if(u.effect==='prestigeMult')state.prestigeMult+=u.value;
 logEvent(`Researched ${u.name}`);renderUpgrades();renderResources();renderDemandUI();renderMarketing();
 }
 function buyMarketing(id){const m=MARKETING.find(x=>x.id===id);if(!m)return;const lvl=state.marketing[id]||0;const cost=Math.floor(m.baseCost*Math.pow(m.costMult,lvl));if(state.cash<cost){toast('Not enough cash');return;}state.cash-=cost;state.marketing[id]=lvl+1;logEvent(`${m.name} → Lv ${lvl+1}`);toast(`${m.name} upgraded!`);renderMarketing();renderResources();renderDemandUI();}
@@ -618,11 +750,12 @@ renderStocks();renderResources();
 function doPrestige(){
 if(state.lifetimeSales<getNextPrestigeReq())return;const gain=getPrestigeGain();
 state.prestigeLevel+=1;state.prestigeMult+=gain;
-state.cash=60;state.pencils=0;state.materials=350;state.clickPower=1;state.quality=1;state.rateMult=1;
+state.cash=60;state.pencils=0;state.materials=350;state.clickPower:1;state.quality=1;state.rateMult=1;
 state.brand=1+state.prestigeLevel*0.06;state.marketing={};MARKETING.forEach(m=>state.marketing[m.id]=0);
 state.matSave=0;state.storage=3000;state.totalProduced=0;state.totalSold=0;state.lifetimeSales=0;
 state.machines={};MACHINES.forEach(m=>state.machines[m.id]=0);state.upgradesOwned={};state.askingPrice=0.95;state.clearanceActive=false;
-state.autoCool=false;state.autoGuide=false;state.autopilot=false;
+state.autoCool=false;state.autoGuide=false;state.autopilot=false;state.parallelSlots=1;state.activeMissions=[];
+state.engine=0;
 logEvent(`PRESTIGE! ×${state.prestigeMult.toFixed(2)}`);toast(`Prestige +${gain.toFixed(2)}×`);renderAll();saveGame();
 }
 function tickStocks(){
@@ -630,10 +763,178 @@ const rate=getTotalRate()+getSpaceRate();const successRate=state.missionsFlown>0
 STOCKS_DEF.forEach(def=>{
 const st=state.stocks[def.id];let change=(Math.random()-0.5)*def.vol*st.price;change+=(def.base-st.price)*0.0012;
 if(rate>20)change+=rate*0.0001*def.sens*(Math.random()>0.4?1:-0.3);
-if(def.sector==='aerospace'){change+=(successRate-0.5)*st.price*0.008;if(state.currentMission)change*=1.4;}
+if(def.sector==='aerospace'){change+=(successRate-0.5)*st.price*0.008;if(state.activeMissions.length)change*=1.3;}
 st.price=clamp(st.price+change,0.4,8000);st.history.push(st.price);if(st.history.length>50)st.history.shift();
 });
 }
+// ===== MAP & TRAJECTORY SYSTEM =====
+const stars=Array.from({length:140},()=>[Math.random(),Math.random(),Math.random()]);
+const PL=[
+{id:'venus',a:70,s:.9,col:'#e8c27a',r:5,name:'Venus'},
+{id:'earth',a:105,s:.7,col:'#5a9fe0',r:6,name:'Earth'},
+{id:'mars',a:140,s:.5,col:'#d96b4a',r:5,name:'Mars'},
+{id:'ceres',a:170,s:.38,col:'#bbb',r:3.5,name:'Ceres'},
+{id:'europa',a:205,s:.25,col:'#d9b38c',r:7,name:'Europa'},
+{id:'titan',a:240,s:.18,col:'#e0b25a',r:6.5,name:'Titan'},
+{id:'pluto',a:270,s:.12,col:'#cfc3b8',r:3.5,name:'Pluto'},
+{id:'kuiper',a:300,s:.09,col:'#8ab4c8',r:3.5,name:'Kuiper'},
+{id:'oort',a:330,s:.06,col:'#7a6fd0',r:3.5,name:'Oort'}
+];
+let mapFocus=null, mapHover=null, mapMouse={x:-1,y:-1};
+const pos={};
+const streaks=[];
+function meteors(n){for(let i=0;i<n;i++)streaks.push({x:Math.random()*720,y:Math.random()*120-20,vx:-2-Math.random()*5,vy:2+Math.random()*4,l:1});}
+function updateFlights(dt){
+const now=performance.now();
+state.activeMissions.forEach(f=>{
+if(f.status!=='flying')return;
+const elapsed=(now-f.startTime)/1000;
+f.progress=Math.min(1,elapsed/f.duration);
+const idx=Math.floor(f.progress*(f.traj.length-1));
+f.pathIndex=idx;
+f.pos=f.traj[idx]||f.traj[f.traj.length-1];
+// Collision checks every few frames
+if(idx%3===0){
+// Sun collision (center)
+const distSun=Math.hypot(f.pos.x,f.pos.y);
+if(distSun<22){resolveMission(f,false);return;}
+// Wrong body collision
+PL.forEach(p=>{
+if(p.id===f.target)return;
+const pp=pos[p.id];if(!pp)return;
+const d=Math.hypot(f.pos.x+360-pp.x,f.pos.y+210-pp.y); // map is centered later
+// simplified: use relative
+});
+}
+// Success when near end and close to target
+if(f.progress>0.92){
+const targetP=pos[f.target];
+if(targetP){
+// success chance modified by risk
+const baseChance=1-(f.difficulty+(f.riskBonus||0))*0.6;
+if(Math.random()<baseChance+0.15) resolveMission(f,true);
+else resolveMission(f,false);
+}else{
+// fallback
+if(f.progress>=1) resolveMission(f,Math.random()>f.difficulty*0.7);
+}
+}
+});
+}
+function drawMap(t){
+const c=document.getElementById('px-map');if(!c||!c.offsetParent)return;
+const g=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2;
+g.fillStyle='#05070f';g.fillRect(0,0,W,H);
+// stars
+stars.forEach(s=>{g.globalAlpha=.25+.75*Math.abs(Math.sin(t/900+s[2]*9));g.fillStyle='#fff';g.fillRect(s[0]*W,s[1]*H,s[2]*1.9+.3,s[2]*1.9+.3);});g.globalAlpha=1;
+// Sun
+const sg=g.createRadialGradient(cx,cy,2,cx,cy,38);
+sg.addColorStop(0,'#fff6c8');sg.addColorStop(.25,'#ffc34d');sg.addColorStop(1,'rgba(255,140,30,0)');
+g.fillStyle=sg;g.beginPath();g.arc(cx,cy,32+3*Math.sin(t/380),0,7);g.fill();
+// Megastructures visual
+const dy=state.x.mega.dyson||0,mb=state.x.mega.matrioshka||0,sing=state.x.mega.sing||0;
+if(mb){g.strokeStyle='rgba(190,120,255,.45)';[42,50].forEach((r,i)=>{g.beginPath();g.ellipse(cx,cy,r,r*.58,t/3800*(i?-1:1),0,7);g.stroke();});}
+const n=Math.min(500,dy*45+mb*90);g.fillStyle='rgba(120,220,255,.8)';
+for(let i=0;i<n;i++){const a=i*2.399+t*.00035*(1+(i%5)*.18),r=28+(i%8)*2.8;g.fillRect(cx+Math.cos(a)*r,cy+Math.sin(a)*r*.55,1.5,1.5);}
+if(sing){g.fillStyle='#000';g.beginPath();g.arc(cx,cy,14,0,7);g.fill();g.strokeStyle='rgba(200,110,255,.85)';g.lineWidth=2.5;g.beginPath();g.ellipse(cx,cy,26,8,t/1400,0,7);g.stroke();g.lineWidth=1;}
+// Planets + orbits
+PL.forEach((p,i)=>{
+g.strokeStyle=mapFocus===p.id?'rgba(180,200,255,.35)':'rgba(255,255,255,.07)';
+g.beginPath();g.ellipse(cx,cy,p.a,p.a*.52,0,0,7);g.stroke();
+const th=t/1000*p.s*.28+i*1.25;
+const x=cx+p.a*Math.cos(th),y=cy+p.a*.52*Math.sin(th);
+pos[p.id]={x,y,r:p.r};
+const col=state.colonies[p.id],own=col&&col.owned;
+g.globalAlpha=(p.id==='earth'||own)?1:.45;
+if(own){g.shadowColor='#ffd35a';g.shadowBlur=12;}
+g.fillStyle=p.col;g.beginPath();g.arc(x,y,p.r+(mapHover===p.id?1.5:0),0,7);g.fill();g.shadowBlur=0;
+if(own){
+g.fillStyle=`rgba(255,210,80,${col.progress*.8})`;g.beginPath();g.arc(x,y,p.r,0,7);g.fill();
+g.strokeStyle='#ffd35a';g.lineWidth=2;g.beginPath();g.arc(x,y,p.r+5,-Math.PI/2,-Math.PI/2+col.progress*6.283);g.stroke();g.lineWidth=1;
+}
+g.globalAlpha=1;
+if(p.id==='earth'){
+const mo=state.colonies.moon,a=t/480;
+const mxp=x+Math.cos(a)*14,myp=y+Math.sin(a)*9;
+g.fillStyle=mo&&mo.owned?'#ffe08a':'#ccc';g.beginPath();g.arc(mxp,myp,2.4,0,7);g.fill();
+pos.moon={x:mxp,y:myp,r:2.4};
+g.fillStyle='#6b8f9e';g.font='10px monospace';g.fillText('Earth',x+9,y-9);
+}else if(own||mapHover===p.id){
+g.fillStyle='#b3c1ff';g.font='9px monospace';g.fillText(p.name,x+p.r+5,y+3);
+}
+// Orbiters around owned bodies
+if(own){
+const orbCount=(state.x.mega.foundry||0)+(state.x.mega.station||0)+(state.x.mega.ring||0);
+for(let o=0;o<Math.min(6,orbCount);o++){
+const oa=t/600+o*1.1+i,or=p.r+9+o*3.5;
+g.fillStyle='rgba(180,220,255,.9)';g.beginPath();g.arc(x+Math.cos(oa)*or,y+Math.sin(oa)*or*.7,1.6,0,7);g.fill();
+}
+}
+});
+// Active missions (rockets + trails)
+state.activeMissions.forEach(f=>{
+if(!f.pos||f.status!=='flying')return;
+// draw path ghost
+g.strokeStyle='rgba(255,160,60,.18)';g.lineWidth=1.5;g.beginPath();
+f.traj.forEach((pt,i)=>{const px=cx+pt.x,py=cy+pt.y;i?g.lineTo(px,py):g.moveTo(px,py);});
+g.stroke();
+// rocket
+const rx=cx+f.pos.x,ry=cy+f.pos.y;
+// trail
+g.fillStyle='rgba(255,140,40,.7)';
+for(let k=1;k<8;k++){
+const prev=f.traj[Math.max(0,f.pathIndex-k)];
+if(prev){g.globalAlpha=1-k/8;g.beginPath();g.arc(cx+prev.x,cy+prev.y,2.2-k*0.2,0,7);g.fill();}
+}
+g.globalAlpha=1;
+g.shadowColor='#ff9a3c';g.shadowBlur=12;
+g.fillStyle='#fff';g.beginPath();g.arc(rx,ry,3.2,0,7);g.fill();
+g.shadowBlur=0;
+// label
+g.fillStyle='#ffcc88';g.font='9px monospace';g.fillText(f.name.split(' ')[0],rx+6,ry-6);
+});
+// meteors
+for(let i=streaks.length-1;i>=0;i--){
+const s=streaks[i];g.strokeStyle=`rgba(255,230,180,${s.l})`;g.beginPath();g.moveTo(s.x,s.y);g.lineTo(s.x-s.vx*7,s.y-s.vy*7);g.stroke();
+s.x+=s.vx;s.y+=s.vy;s.l-=.013;if(s.l<=0)streaks.splice(i,1);
+}
+// focus ring
+if(mapFocus&&pos[mapFocus]){
+const fp=pos[mapFocus];
+g.strokeStyle='rgba(140,180,255,.6)';g.lineWidth=1.5;g.setLineDash([4,3]);
+g.beginPath();g.arc(fp.x,fp.y,fp.r+11,0,7);g.stroke();g.setLineDash([]);g.lineWidth=1;
+}
+}
+// Map interaction
+const mapCanvas=document.getElementById('px-map');
+if(mapCanvas){
+mapCanvas.addEventListener('mousemove',e=>{
+const r=mapCanvas.getBoundingClientRect();
+mapMouse.x=(e.clientX-r.left)*mapCanvas.width/r.width;
+mapMouse.y=(e.clientY-r.top)*mapCanvas.height/r.height;
+// hover detect
+mapHover=null;
+const tip=document.getElementById('map-tooltip');
+for(const p of PL){
+const pp=pos[p.id];if(!pp)continue;
+if(Math.hypot(mapMouse.x-pp.x,mapMouse.y-pp.y)<pp.r+8){
+mapHover=p.id;
+const col=state.colonies[p.id];
+tip.style.display='block';
+tip.style.left=(e.clientX-r.left+14)+'px';
+tip.style.top=(e.clientY-r.top-10)+'px';
+tip.innerHTML=`<strong>${p.name}</strong><br>${col&&col.owned?`Owned · ${Math.round(col.progress*100)}% converted`:'Unclaimed'}<br>Click to focus`;
+return;
+}
+}
+tip.style.display='none';
+});
+mapCanvas.addEventListener('mouseleave',()=>{mapHover=null;document.getElementById('map-tooltip').style.display='none';});
+mapCanvas.addEventListener('click',()=>{
+if(mapHover){mapFocus=mapFocus===mapHover?null:mapHover;document.getElementById('map-focus-label').textContent=mapFocus?('Focus: '+mapFocus):'';}
+});
+}
+// ===== REST OF GAME LOOP & RENDER =====
 let lastFrame=performance.now();let lastSaleFlash=0;
 function gameLoop(now){
 const dt=Math.min((now-lastFrame)/1000,0.12);lastFrame=now;
@@ -644,6 +945,7 @@ produced=Math.min(produced,state.storage-state.pencils);
 if(produced>0){state.pencils+=produced;state.totalProduced+=produced;state.lifetimePencilsMade=(state.lifetimePencilsMade||0)+produced;state.materials=Math.max(0,state.materials-produced*0.7);}
 }
 tickColonies(dt);
+updateFlights(dt);
 const salesRate=getSalesRate();state.pencils=clamp(state.pencils,0,state.storage);
 const availableInventory=state.pencils;const toSell=Math.min(availableInventory,Math.max(0,salesRate*dt));
 if(toSell>0){
@@ -664,7 +966,8 @@ updateCharts();
 }
 checkSpaceUnlocks();
 state.cash=clamp(state.cash,0,1e15);state.pencils=clamp(state.pencils,0,state.storage);state.materials=clamp(state.materials,0,5e6);
-renderResources();renderDemandUI();requestAnimationFrame(gameLoop);
+renderResources();renderDemandUI();
+requestAnimationFrame(gameLoop);
 }
 function renderResources(){
 animateValue('cash-display',state.cash,formatMoney);
@@ -676,7 +979,7 @@ const sp=getSpaceRate();if(document.getElementById('space-prod-display'))animate
 const cp=document.getElementById('click-power');if(cp)cp.textContent=formatNum(state.clickPower*state.prestigeMult,1);
 const uc=document.getElementById('unit-cost');if(uc)uc.textContent=getUnitMaterialCost().toFixed(2);
 const qb=document.getElementById('quality-badge');
-if(qb){if(state.quality>=2.2)qb.textContent='Signature';else if(state.quality>=1.8)qb.textContent='Artist Series';else if(state.quality>=1.4)qb.textContent='Cedar Select';else if(state.quality>=1.15)qb.textContent='Premium HB';else qb.textContent='Standard HB';}
+if(qb){if(state.quality>=2.8)qb.textContent='Quantum';else if(state.quality>=2.2)qb.textContent='Signature';else if(state.quality>=1.8)qb.textContent='Artist Series';else if(state.quality>=1.4)qb.textContent='Cedar Select';else if(state.quality>=1.15)qb.textContent='Premium HB';else qb.textContent='Standard HB';}
 const inv=document.getElementById('inv-stat');if(inv)inv.textContent=formatNum(state.pencils,0)+'/'+formatNum(state.storage,0);
 const aut=document.getElementById('auto-stat');if(aut)aut.textContent=formatNum(getTotalRate(),1)+'/s';
 const tot=document.getElementById('total-made-stat');if(tot)tot.textContent=formatNum(state.totalProduced,0);
@@ -691,6 +994,7 @@ const pg=document.getElementById('prestige-gain');if(pg)pg.textContent='+'+gain.
 const pbtn=document.getElementById('prestige-btn');if(pbtn){pbtn.disabled=state.lifetimeSales<req;pbtn.textContent=state.lifetimeSales<req?`Need ${formatMoney(req)}`:'Prestige Now';}
 const tm=document.getElementById('total-mass');if(tm)tm.textContent=formatNum(state.totalMassConverted,1);
 const cp2=document.getElementById('cosmos-prod');if(cp2)cp2.textContent=formatNum(getSpaceRate(),1);
+const afc=document.getElementById('active-flight-count');if(afc)afc.textContent=state.activeMissions.filter(f=>f.status==='flying').length;
 }
 function renderDemandUI(){
 const demand=getDemandPercent();const pctVisual=Math.min(100,(demand/2)*100);
@@ -753,16 +1057,21 @@ function renderMissionUI(){
 const list=document.getElementById('missions-list');if(!list)return;
 list.innerHTML=MISSIONS.map(m=>{
 const locked=state.lifetimeSales<m.reqSold;const can=canLaunch(m);
-return`<div class="mission-card ${locked?'locked':''}"><div class="mission-title"><span>${m.name}</span><span style="font-family:var(--mono);font-size:0.75rem;color:var(--gold)">${formatMoney(m.cost)}</span></div><div class="mission-desc">${m.desc}</div><div class="mission-stats">Mat: ${m.materials} · Diff: ${Math.round(m.difficulty*100)}% · Reward: ${formatMoney(m.reward)}</div>${locked?`<div class="locked-hint">Requires ${formatMoney(m.reqSold)} lifetime sales</div>`:`<button class="buy-btn" style="margin-top:6px" ${can&&!state.currentMission?'':'disabled'} onclick="startMission('${m.id}')">${state.currentMission?'In flight...':(can?'Launch':'Insufficient resources')}</button>`}</div>`;
+return`<div class="mission-card ${locked?'locked':''}"><div class="mission-title"><span>${m.name}</span><span style="font-family:var(--mono);font-size:0.75rem;color:var(--gold)">${formatMoney(m.cost)}</span></div><div class="mission-desc">${m.desc}</div><div class="mission-stats">Mat: ${m.materials} · Diff: ${Math.round(m.difficulty*100)}% · ~${m.duration}s · Reward: ${formatMoney(m.reward)}</div>${locked?`<div class="locked-hint">Requires ${formatMoney(m.reqSold)} lifetime sales</div>`:`<button class="buy-btn" style="margin-top:6px" ${can?'':'disabled'} onclick="startMission('${m.id}')">${state.activeMissions.length>=state.parallelSlots?'Bays full':(can?'Launch':'Insufficient resources')}</button>`}</div>`;
 }).join('');
 document.getElementById('auto-cool-status').textContent=state.autoCool?'ON':'OFF';
 document.getElementById('auto-guide-status').textContent=state.autoGuide?'ON':'OFF';
 document.getElementById('autopilot-status').textContent=state.autopilot?'ON':'OFF';
+document.getElementById('parallel-status').textContent=state.parallelSlots;
 document.getElementById('missions-flown').textContent=state.missionsFlown;
 document.getElementById('success-rate').textContent=state.missionsFlown>0?Math.round(state.missionsSuccess/state.missionsFlown*100)+'%':'—';
 document.getElementById('buy-autocool').disabled=state.autoCool||state.cash<2500;
 document.getElementById('buy-autoguide').disabled=state.autoGuide||state.cash<8000;
 document.getElementById('buy-autopilot').disabled=state.autopilot||state.cash<35000;
+document.getElementById('buy-parallel').disabled=state.parallelSlots>=4||state.cash<75000;
+// active chips
+const chips=document.getElementById('active-missions');
+if(chips)chips.innerHTML=state.activeMissions.filter(f=>f.status==='flying').map(f=>`<span class="active-mission-chip">🚀 ${f.name.split(' ')[0]} ${Math.round(f.progress*100)}%</span>`).join('');
 }
 function renderColonies(){
 const list=document.getElementById('colonies-list');if(!list)return;
@@ -772,6 +1081,33 @@ if(!col.owned)return`<div class="colony-card" style="opacity:0.45"><div class="c
 const rate=c.baseRate*col.progress*col.rateMult*state.prestigeMult;
 return`<div class="colony-card"><div style="display:flex;justify-content:space-between"><span class="colony-name">${c.icon} ${c.name}</span><span class="colony-pct">${Math.round(col.progress*100)}% converted</span></div><div class="colony-bar"><div class="colony-bar-fill" style="width:${col.progress*100}%"></div></div><div style="font-size:0.78rem;color:var(--text-dim)">${c.desc}</div><div style="font-family:var(--mono);font-size:0.8rem;color:var(--space-bright);margin-top:4px">${formatNum(rate,1)} pencils/s</div></div>`;
 }).join('');
+}
+function renderMega(){
+const el=document.getElementById('px-mega');if(!el)return;
+const lock=!state.cosmosUnlocked;
+el.innerHTML=`<div class="hint" style="margin-bottom:6px">Orbiters appear on the map around owned bodies. Sold as bulk export at 35% of your price · Total: <b>${formatNum(megaRate(),1)}/s</b></div>`+
+MEGA.map(m=>{
+const owned=state.x.mega[m.id]||0;
+const cost=Math.floor(m.base*Math.pow(1.55,owned));
+return`<div class="mkt-card"><div class="mkt-title">${m.i} ${m.n} ×${owned}${m.orbiter?' · ORBITER':''}</div><div class="mkt-desc">+${formatNum(m.rate,0)} pencils/s each</div><button class="buy-btn" ${(state.cash>=cost&&!lock)?'':'disabled'} onclick="pxMega('${m.id}')">${lock?'Unlock Cosmos first':'Build — '+formatMoney(cost)}</button></div>`;
+}).join('');
+}
+window.pxMega=id=>{
+const m=MEGA.find(x=>x.id===id);if(!m||!state.cosmosUnlocked)return;
+const c=Math.floor(m.base*Math.pow(1.55,state.x.mega[id]||0));
+if(state.cash<c)return;state.cash-=c;state.x.mega[id]=(state.x.mega[id]||0)+1;
+logEvent('Built '+m.n);toast(m.i+' '+m.n+' online!');renderMega();renderResources();
+};
+window.pxEng=()=>{
+const e=ENG[state.engine+1];if(!e||state.cash<e.c)return;
+state.cash-=e.c;state.engine++;toast('🔥 '+e.n+' installed');logEvent('Engine upgrade: '+e.n);renderEng();
+};
+function renderEng(){
+const el=document.getElementById('px-eng');if(!el)return;
+const cur=ENG[state.engine];
+const next=ENG[state.engine+1];
+el.innerHTML=`<div class="material-row"><span>Current</span><span style="font-family:var(--mono)">${cur.n}${cur.b?` (−${Math.round(cur.b*50)}% risk)`:''}</span></div>`+
+(next?`<button class="buy-btn" style="margin-top:8px" ${state.cash>=next.c?'':'disabled'} onclick="pxEng()">${next.n} — ${formatMoney(next.c)}</button>`:'<p class="hint">Fully upgraded.</p>');
 }
 let prodChart,demandChart,cashChart,portChart,aeroChart,successChart,massChart,conversionChart;
 function initCharts(){
@@ -797,15 +1133,20 @@ if(successChart){successChart.data.labels=h.labels;successChart.data.datasets[0]
 if(massChart){massChart.data.labels=h.labels;massChart.data.datasets[0].data=h.mass;massChart.update('none');}
 if(conversionChart){conversionChart.data.datasets[0].data=COLONIES.map(c=>Math.round((state.colonies[c.id].progress||0)*100));conversionChart.update('none');}
 }
-function renderAll(){renderResources();renderDemandUI();renderMachines();renderUpgrades();renderMarketing();renderSupply();renderStocks();renderLog();renderMissionUI();renderColonies();renderMissionLog();}
+function renderAll(){renderResources();renderDemandUI();renderMachines();renderUpgrades();renderMarketing();renderSupply();renderStocks();renderLog();renderMissionUI();renderColonies();renderMissionLog();renderMega();renderEng();}
 function saveGame(){state.lastTick=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
 function loadGame(){
 try{
 const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
 const loaded=JSON.parse(raw);
 if(!loaded||typeof loaded.cash!=='number'||loaded.cash>1e15||loaded.cash<0){localStorage.removeItem(SAVE_KEY);return false;}
-Object.assign(state,loaded);state.lifetimePencilsMade=Math.max(0,safe(state.lifetimePencilsMade,state.totalProduced||0));
+Object.assign(state,loaded);
+state.lifetimePencilsMade=Math.max(0,safe(state.lifetimePencilsMade,state.totalProduced||0));
 state.cash=clamp(state.cash,0,1e15);state.pencils=clamp(state.pencils,0,1e9);state.materials=clamp(state.materials,0,5e6);state.askingPrice=clamp(state.askingPrice,0.1,40);
+state.activeMissions=state.activeMissions||[];
+state.parallelSlots=state.parallelSlots||1;
+state.engine=state.engine||0;
+state.x=state.x||{ach:{},mega:{},c:{},sel:'aero'};
 MACHINES.forEach(m=>{if(state.machines[m.id]===undefined)state.machines[m.id]=0;});
 MARKETING.forEach(m=>{if(state.marketing[m.id]===undefined)state.marketing[m.id]=0;});
 STOCKS_DEF.forEach(s=>{if(!state.stocks[s.id])state.stocks[s.id]={price:s.base,shares:0,history:[s.base]};});
@@ -832,7 +1173,7 @@ document.getElementById('panel-'+id)?.classList.add('active');
 document.querySelectorAll(`.nav-btn[data-panel="${id}"]`).forEach(b=>b.classList.add('active'));
 if(id==='machines')renderMachines();if(id==='upgrades')renderUpgrades();if(id==='marketing')renderMarketing();
 if(id==='supply')renderSupply();if(id==='market')renderStocks();if(id==='analytics')updateCharts();
-if(id==='mission')renderMissionUI();if(id==='cosmos')renderColonies();
+if(id==='mission')renderMissionUI();if(id==='cosmos'){renderColonies();renderMega();renderEng();}
 }
 document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>switchPanel(btn.dataset.panel));});
 const mobileTabs=document.getElementById('mobile-tabs');
@@ -850,6 +1191,7 @@ document.getElementById('buy-bulk-btn').addEventListener('click',()=>buyMaterial
 const priceInput=document.getElementById('asking-price'),priceSlider=document.getElementById('price-slider');
 priceInput.addEventListener('input',()=>setAskingPrice(priceInput.value));
 priceSlider.addEventListener('input',()=>setAskingPrice(priceSlider.value/100));
+// Debug
 let debugChordAt=0;
 const debugOverlay=document.getElementById('overlay-debug');
 function openDebugConsole(){debugOverlay.classList.add('show');document.getElementById('debug-cash').value='';setTimeout(()=>document.getElementById('debug-cash').focus(),40);}
@@ -877,155 +1219,25 @@ const now=Date.now();
 if(e.key.toLowerCase()==='t'){debugChordAt=now;return;}
 if(e.key.toLowerCase()==='p'&&now-debugChordAt<1000){debugChordAt=0;e.preventDefault();openDebugConsole();}
 });
+// Achievements + news + extra systems (kept lightweight)
+const ACH=[['First Thousand','Sell 1,000 pencils',()=>state.totalSold>=1e3],['Millionaire','Hold $1M cash',()=>state.cash>=1e6],['Rocket Scientist','Land a mission',()=>state.missionsSuccess>=1],['Space Baron','Unlock Cosmos',()=>state.cosmosUnlocked],['Wall Street','Portfolio $100K',()=>getPortfolioValue()>=1e5],['Planet Eater','Fully convert a world',()=>Object.values(state.colonies).some(c=>c.progress>=1)],['Dyson Dreamer','Build a Dyson Swarm',()=>(state.x.mega.dyson||0)>=1],['Reborn','Prestige once',()=>state.prestigeLevel>=1],['Billionaire','Hold $1B cash',()=>state.cash>=1e9],['Fleet Commander','3 parallel missions',()=>state.parallelSlots>=3]];
+setInterval(()=>{
+ACH.forEach(a=>{if(!state.x.ach[a[0]]&&a[2]()){state.x.ach[a[0]]=1;state.cash=clamp(state.cash+1500,0,1e15);toast('🏆 '+a[0]+'!');logEvent('Achievement: '+a[0]);}});
+const achEl=document.getElementById('px-ach');
+if(achEl)achEl.innerHTML=ACH.map(a=>`<div class="px-ach${state.x.ach[a[0]]?'':' off'}"><span>${state.x.ach[a[0]]?'🏆':'🔒'}</span><div><b>${a[0]}</b><div class="hint" style="margin:0">${a[1]}</div></div></div>`).join('');
+const an=document.getElementById('px-achn');if(an)an.textContent=Object.keys(state.x.ach).length+'/'+ACH.length;
+},2000);
+// Mega export tick
+setInterval(()=>{const r=megaRate();if(r>0){const n=r*.25,rev=n*state.askingPrice*.35;state.totalProduced+=n;state.lifetimePencilsMade=(state.lifetimePencilsMade||0)+n;state.cash=clamp(state.cash+rev,0,1e15);state.lifetimeSales+=rev;}},250);
+// Animation frame for map
+(function frame(t){drawMap(t);requestAnimationFrame(frame);})(0);
 setInterval(saveGame,10000);
 const loaded=loadGame();
 if(!loaded){state.cash=45;state.pencils=0;state.materials=350;state.askingPrice=0.95;}
 setAskingPrice(state.askingPrice||0.95);initCharts();renderAll();requestAnimationFrame(gameLoop);
 logEvent('Factory online. Click the pencil and buy Local Ads early!');
 if(state.spaceUnlocked)logEvent('Aerospace Division standing by.');
-</script>
-<script>
-(()=>{
-const $=i=>document.getElementById(i),R=(a,b)=>a+Math.random()*(b-a),F=n=>formatNum(n,1);
-const setH=(el,h)=>{if(el&&el._h!==h){el._h=h;el.innerHTML=h}};
-const X=state.x=Object.assign({ach:{},mega:{},engine:0,c:{},sel:'aero'},state.x||{});
-COLONIES.push(
-{id:'venus',name:'Venus Cloud City',icon:'🟡',baseRate:9000,mass:4.9e12,desc:'Floating pencil habitats in the clouds.'},
-{id:'ceres',name:'Ceres Mines',icon:'⚪',baseRate:16000,mass:9e8,desc:'Asteroid-belt graphite hub.'},
-{id:'pluto',name:'Pluto Works',icon:'🤍',baseRate:30000,mass:1.3e10,desc:'A frozen heart that sharpens.'},
-{id:'oort',name:'Oort Cloud Fleet',icon:'🌌',baseRate:75000,mass:1e13,desc:'A trillion comets turned to lead.'});
-MISSIONS.push(
-{id:'venus',name:'Venus Cloud Drop',desc:'Aerobrake into the clouds and seed floating factories.',cost:6e6,materials:20000,difficulty:0.6,reward:1.1e7,unlockColony:'venus',reqSold:1e9,formula:null},
-{id:'ceres',name:'Ceres Prospector',desc:'Land on the dwarf planet and tap the graphite veins.',cost:2.4e7,materials:40000,difficulty:0.64,reward:4.6e7,unlockColony:'ceres',reqSold:4e9,formula:null},
-{id:'pluto',name:'Pluto Flyby Factory',desc:'Build a robotic works at the edge of the Sun’s reach.',cost:9e7,materials:80000,difficulty:0.68,reward:1.8e8,unlockColony:'pluto',reqSold:1.5e10,formula:null},
-{id:'oort',name:'Oort Cloud Armada',desc:'Launch the swarm that converts comets into pencils.',cost:4e8,materials:150000,difficulty:0.72,reward:8e8,unlockColony:'oort',reqSold:6e10,formula:null});
-COLONIES.forEach(c=>{if(!state.colonies[c.id])state.colonies[c.id]={owned:false,progress:0,rateMult:1}});
-STOCKS_DEF.push(
-{id:'pncl',ticker:'PNCL',name:'Your Company',base:40,vol:0.03,sens:0,sector:'self'},
-{id:'dyson',ticker:'DYS',name:'DysonDynamics',base:260,vol:0.055,sens:0.55,sector:'aerospace'},
-{id:'warp',ticker:'WRP',name:'WarpDriveCo',base:600,vol:0.065,sens:0.6,sector:'aerospace'});
-STOCKS_DEF.forEach(s=>{if(!state.stocks[s.id])state.stocks[s.id]={price:s.base,shares:0,history:[s.base]}});
-if(typeof conversionChart!=='undefined'&&conversionChart)conversionChart.data.labels=COLONIES.map(c=>c.name);
-const MEGA=[{id:'foundry',n:'Orbital Pencil Foundry',i:'🛰️',base:2.5e5,rate:400},{id:'dyson',n:'Dyson Swarm',i:'☀️',base:5e7,rate:3e4},{id:'matrioshka',n:'Matrioshka Brain',i:'🧠',base:5e9,rate:2.5e6},{id:'sing',n:'Pencil Singularity',i:'🕳️',base:2e12,rate:4e8}];
-const mc=m=>Math.floor(m.base*Math.pow(1.55,X.mega[m.id]||0));
-const megaRate=()=>MEGA.reduce((s,m)=>s+m.rate*(X.mega[m.id]||0),0)*state.prestigeMult;
-const ENG=[{n:'Ion Drive',c:1.5e5,b:.12},{n:'Fusion Torch',c:4e6,b:.25},{n:'Antimatter Core',c:3e8,b:.4}];
-window.pxMega=id=>{const m=MEGA.find(x=>x.id===id),c=mc(m);if(!state.cosmosUnlocked||state.cash<c)return;state.cash-=c;X.mega[id]=(X.mega[id]||0)+1;logEvent('Built '+m.n);toast(m.i+' '+m.n+' online!');};
-window.pxEng=()=>{const e=ENG[X.engine];if(!e||state.cash<e.c)return;state.cash-=e.c;X.engine++;toast('🔥 '+e.n+' installed');logEvent('Engine upgrade: '+e.n);};
-window.pxSel=id=>{X.sel=id};
-const _sm=startMission;
-startMission=function(id){_sm(id);if(state.currentMission&&X.engine)state.currentMission.riskBonus=(state.currentMission.riskBonus||0)-ENG[X.engine-1].b*.5;};
-document.body.insertAdjacentHTML('beforeend','<div class="px-tape"><span class="px-tape-in" id="px-tape-in"></span></div>');
-$('panel-market').insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h3>🕯️ Candlestick Terminal <span id="px-quote" style="margin-left:auto;font-family:var(--mono);font-size:.75rem;color:var(--text-dim)"></span></h3><div id="px-chips" class="actions-bar" style="margin:0 0 8px"></div><canvas id="px-candle" class="px-canvas" width="720" height="260"></canvas><p class="hint">Each candle = 8s. Dashed line = 8-candle average. Hover for crosshair. PNCL is your own company — it follows your sales.</p></div>');
-$('space-status').insertAdjacentHTML('afterend','<div class="card" style="margin-bottom:12px"><h3>🛰️ Live Solar System</h3><canvas id="px-map" class="px-canvas" width="720" height="380"></canvas><p class="hint">Gold rings show conversion. Rockets fly during missions. Megastructures appear around the Sun.</p></div><div class="card" style="margin-bottom:12px"><h3>🔥 Engines <span class="hint" style="margin-left:auto">lower mission risk</span></h3><div id="px-eng"></div></div>');
-$('colonies-list').insertAdjacentHTML('afterend','<div class="card" style="margin-top:12px"><h3>🏗️ Megastructures</h3><div id="px-mega"></div></div>');
-$('panel-office').insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h3>🏆 Achievements <span id="px-achn" class="hint" style="margin-left:auto"></span></h3><div id="px-ach"></div></div>');
-$('overlay-thermal').querySelector('.telemetry').insertAdjacentHTML('beforebegin','<canvas id="px-heat" width="380" height="70" style="width:100%;border-radius:8px;margin:6px 0"></canvas>');
-let mx=-1,my=-1;const cv=$('px-candle');
-cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=(e.clientX-r.left)*cv.width/r.width;my=(e.clientY-r.top)*cv.height/r.height});
-cv.addEventListener('mouseleave',()=>{mx=-1});
-function drawCandles(){
-if(!cv.offsetParent)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,d=X.c[X.sel]||[];
-g.fillStyle='#05070f';g.fillRect(0,0,W,H);
-if(d.length<2){g.fillStyle='#9a8d7a';g.font='14px monospace';g.fillText('Collecting market data…',20,30);return}
-let hi=Math.max(...d.map(x=>x[1])),lo=Math.min(...d.map(x=>x[2]));const pad=(hi-lo)*.12||1;hi+=pad;lo-=pad;
-const Y=v=>H-20-(v-lo)/(hi-lo)*(H-40),w=(W-52)/d.length;
-g.strokeStyle='rgba(255,255,255,.06)';g.fillStyle='#6b5f50';g.font='10px monospace';
-for(let i=0;i<5;i++){const v=lo+(hi-lo)*i/4,y=Y(v);g.beginPath();g.moveTo(0,y);g.lineTo(W-50,y);g.stroke();g.fillText(v.toFixed(2),W-48,y+3)}
-d.forEach((k,i)=>{const x=i*w+w/2,up=k[3]>=k[0];g.strokeStyle=g.fillStyle=up?'#9bc892':'#c47b6a';g.beginPath();g.moveTo(x,Y(k[1]));g.lineTo(x,Y(k[2]));g.stroke();const t=Y(Math.max(k[0],k[3])),b=Y(Math.min(k[0],k[3]));g.fillRect(x-w*.32,t,w*.64,Math.max(1.5,b-t))});
-g.strokeStyle='#e0b060';g.setLineDash([4,3]);g.beginPath();
-d.forEach((k,i)=>{const s=d.slice(Math.max(0,i-7),i+1),m=s.reduce((a,x)=>a+x[3],0)/s.length,x=i*w+w/2;i?g.lineTo(x,Y(m)):g.moveTo(x,Y(m))});g.stroke();g.setLineDash([]);
-const ly=Y(d[d.length-1][3]);g.strokeStyle='rgba(123,163,212,'+(.35+.3*Math.sin(Date.now()/300))+')';g.beginPath();g.moveTo(0,ly);g.lineTo(W-50,ly);g.stroke();
-if(mx>=0){g.strokeStyle='rgba(255,255,255,.35)';g.beginPath();g.moveTo(mx,0);g.lineTo(mx,H);g.moveTo(0,my);g.lineTo(W,my);g.stroke();g.fillStyle='#f3ebe0';g.fillText((lo+(H-20-my)/(H-40)*(hi-lo)).toFixed(2),Math.min(mx+6,W-90),Math.max(12,my-6))}
-}
-const buf={};
-function sample(){STOCKS_DEF.forEach(d=>{const b=buf[d.id]=buf[d.id]||[];b.push(state.stocks[d.id].price);if(b.length>=8){const a=X.c[d.id]=X.c[d.id]||[];a.push([b[0],Math.max(...b),Math.min(...b),b[7]]);if(a.length>70)a.shift();buf[d.id]=[]}})}
-const stars=Array.from({length:110},()=>[Math.random(),Math.random(),Math.random()]);
-const PL=[{id:'venus',a:70,s:.9,col:'#e8c27a',r:4},{id:'earth',a:105,s:.7,col:'#5a9fe0',r:5},{id:'mars',a:140,s:.5,col:'#d96b4a',r:4},{id:'ceres',a:170,s:.38,col:'#bbb',r:3},{id:'europa',a:205,s:.25,col:'#d9b38c',r:7},{id:'titan',a:240,s:.18,col:'#e0b25a',r:6},{id:'pluto',a:270,s:.12,col:'#cfc3b8',r:3},{id:'kuiper',a:300,s:.09,col:'#8ab4c8',r:3},{id:'oort',a:330,s:.06,col:'#7a6fd0',r:3}];
-const pos={},trail=[],streaks=[];let rp=0;
-function meteors(n){for(let i=0;i<n;i++)streaks.push({x:R(0,720),y:R(-20,100),vx:R(-6,-2),vy:R(2,5),l:1})}
-function drawMap(t){
-const c=$('px-map');if(!c||!c.offsetParent)return;const g=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2;
-g.fillStyle='#05070f';g.fillRect(0,0,W,H);
-stars.forEach(s=>{g.globalAlpha=.3+.7*Math.abs(Math.sin(t/900+s[2]*9));g.fillStyle='#fff';g.fillRect(s[0]*W,s[1]*H,s[2]*1.8+.4,s[2]*1.8+.4)});g.globalAlpha=1;
-const sg=g.createRadialGradient(cx,cy,2,cx,cy,36);sg.addColorStop(0,'#fff6c8');sg.addColorStop(.3,'#ffc34d');sg.addColorStop(1,'rgba(255,150,40,0)');
-g.fillStyle=sg;g.beginPath();g.arc(cx,cy,34+2*Math.sin(t/400),0,7);g.fill();
-const dy=X.mega.dyson||0,mb=X.mega.matrioshka||0,sing=X.mega.sing||0;
-if(mb){g.strokeStyle='rgba(190,120,255,.5)';[40,47].forEach((r,i)=>{g.beginPath();g.ellipse(cx,cy,r,r*.6,t/4000*(i?-1:1),0,7);g.stroke()})}
-const n=Math.min(400,dy*40+mb*80);g.fillStyle='rgba(120,220,255,.85)';
-for(let i=0;i<n;i++){const a=i*2.399+t*.0004*(1+(i%5)*.2),r=26+(i%7)*3;g.fillRect(cx+Math.cos(a)*r,cy+Math.sin(a)*r*.6,1.6,1.6)}
-if(sing){g.fillStyle='#000';g.beginPath();g.arc(cx,cy,13,0,7);g.fill();g.strokeStyle='rgba(200,110,255,.9)';g.lineWidth=3;g.beginPath();g.ellipse(cx,cy,24,7,t/1500,0,7);g.stroke();g.lineWidth=1}
-PL.forEach((p,i)=>{
-g.strokeStyle='rgba(255,255,255,.07)';g.beginPath();g.ellipse(cx,cy,p.a,p.a*.5,0,0,7);g.stroke();
-const th=t/1000*p.s*.3+i*1.3,x=cx+p.a*Math.cos(th),y=cy+p.a*.5*Math.sin(th);pos[p.id]={x,y};
-const col=state.colonies[p.id],own=col&&col.owned;
-g.globalAlpha=(p.id==='earth'||own)?1:.5;
-if(own){g.shadowColor='#ffd35a';g.shadowBlur=14}
-g.fillStyle=p.col;g.beginPath();g.arc(x,y,p.r,0,7);g.fill();g.shadowBlur=0;
-if(own){g.fillStyle='rgba(255,210,80,'+col.progress*.85+')';g.beginPath();g.arc(x,y,p.r,0,7);g.fill();
-g.strokeStyle='#ffd35a';g.beginPath();g.arc(x,y,p.r+4,-Math.PI/2,-Math.PI/2+col.progress*6.283);g.stroke()}
-g.globalAlpha=1;
-if(p.id==='earth'){const mo=state.colonies.moon,a=t/500,mxp=x+Math.cos(a)*12,myp=y+Math.sin(a)*8;
-g.fillStyle=mo&&mo.owned?'#ffe08a':'#ccc';g.beginPath();g.arc(mxp,myp,2.2,0,7);g.fill();
-g.fillStyle='#6b8f9e';g.font='9px monospace';g.fillText('Earth',x+8,y-8)}
-else if(own){g.fillStyle='#b3c1ff';g.font='9px monospace';g.fillText(COLONIES.find(c=>c.id===p.id).name.split(' ')[0],x+p.r+6,y+3)}
-});
-const m=state.currentMission;
-if(m){rp=(rp+.004)%1;const e=pos.earth,dst=(m.unlockColony&&m.unlockColony!=='moon'&&pos[m.unlockColony])||null;let rx,ry;
-if(dst){rx=e.x+(dst.x-e.x)*rp;ry=e.y+(dst.y-e.y)*rp-Math.sin(Math.PI*rp)*45}else{rx=e.x+Math.cos(rp*25)*17;ry=e.y+Math.sin(rp*25)*11}
-trail.push([rx,ry]);if(trail.length>40)trail.shift();
-trail.forEach((q,i)=>{g.fillStyle='rgba(255,150,60,'+i/trail.length*.8+')';g.fillRect(q[0],q[1],2,2)});
-g.shadowColor='#ff9a3c';g.shadowBlur=10;g.fillStyle='#fff';g.beginPath();g.arc(rx,ry,2.6,0,7);g.fill();g.shadowBlur=0}
-else{trail.length=0;rp=0}
-for(let i=streaks.length-1;i>=0;i--){const s=streaks[i];g.strokeStyle='rgba(255,230,180,'+s.l+')';g.beginPath();g.moveTo(s.x,s.y);g.lineTo(s.x-s.vx*6,s.y-s.vy*6);g.stroke();s.x+=s.vx;s.y+=s.vy;s.l-=.012;if(s.l<=0)streaks.splice(i,1)}
-}
-const heat=[];
-function drawHeat(){const ov=$('overlay-thermal'),c=$('px-heat');if(!ov.classList.contains('show')){heat.length=0;return}
-heat.push(thermalTemp);if(heat.length>120)heat.shift();const g=c.getContext('2d'),W=c.width,H=c.height;
-g.fillStyle='#0a0e14';g.fillRect(0,0,W,H);g.fillStyle='rgba(196,123,106,.2)';g.fillRect(0,0,W,H-450/700*H);
-g.strokeStyle='#7ba3d4';g.lineWidth=2;g.beginPath();heat.forEach((v,i)=>{const x=i/119*W,y=H-(v-500)/700*H;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();g.lineWidth=1}
-const NEWS=[['Graphite shortage rattles suppliers',['materials'],1.08],['Cedar blight hits forests — lumber up',['materials'],1.07],['Space race hype! Aerospace surges',['aerospace'],1.13],['Rocket failure inquiry spooks investors',['aerospace'],.9],['Back-to-school boom lifts office stocks',['consumer'],1.1],['Robot tax proposed — machinery wobbles',['industrial'],.92],['Rival pencil company goes public',['self'],.93],['Pencil Index hits a record high',['all'],1.05],['Rate fears shake the whole market',['all'],.94],['Fusion breakthrough sparks tech rally',['tech','aerospace'],1.09]];
-const heads=['Pencil Exchange open — good luck, tycoon!'];
-function news(){const [t,sec,m]=NEWS[Math.floor(Math.random()*NEWS.length)];
-STOCKS_DEF.forEach(d=>{if(sec.includes('all')||sec.includes(d.sector)){const s=state.stocks[d.id];s.price=clamp(s.price*m*(1+R(-.02,.02)),.4,8000)}});
-heads.unshift(t);if(heads.length>5)heads.pop();toast('📰 '+t);logEvent('News: '+t)}
-function spaceEvent(){const k=Math.floor(Math.random()*4);let m;
-if(k==0){const n=Math.floor(state.storage*.05);state.pencils=Math.min(state.storage,state.pencils+n);m='☄️ Meteor shower! Harvested '+F(n)+' pencils.';meteors(16)}
-else if(k==1){const v=Math.max(5000,state.cash*.04);state.cash=clamp(state.cash+v,0,1e15);m='👽 Alien signal decoded — licensing deal +'+formatMoney(v)}
-else if(k==2){state.materials=Math.min(5e6,state.materials+3000);m='🛸 Derelict freighter salvaged: +3,000 materials.'}
-else{['aero','orbit','lunar','dyson','warp'].forEach(id=>{state.stocks[id].price*=.9});m='🌞 Solar flare! Aerospace stocks dip.';meteors(8)}
-toast(m);logEvent(m)}
-const ACH=[['First Thousand','Sell 1,000 pencils',()=>state.totalSold>=1e3],['Millionaire','Hold $1M cash',()=>state.cash>=1e6],['Rocket Scientist','Land a mission',()=>state.missionsSuccess>=1],['Space Baron','Unlock Cosmos',()=>state.cosmosUnlocked],['Wall Street','Portfolio $100K',()=>getPortfolioValue()>=1e5],['Planet Eater','Fully convert a world',()=>Object.values(state.colonies).some(c=>c.progress>=1)],['Dyson Dreamer','Build a Dyson Swarm',()=>(X.mega.dyson||0)>=1],['Reborn','Prestige once',()=>state.prestigeLevel>=1],['Billionaire','Hold $1B cash',()=>state.cash>=1e9]];
-let tick=0,nextNews=Date.now()+25000,nextEvt=Date.now()+50000;
-setInterval(()=>{
-tick++;const now=Date.now();
-document.querySelectorAll('[data-panel=mission]').forEach(b=>b.classList.toggle('locked',!state.spaceUnlocked));
-document.querySelectorAll('[data-panel=cosmos]').forEach(b=>b.classList.toggle('locked',!state.cosmosUnlocked));
-$('space-charts').style.display=state.cosmosUnlocked?'grid':'none';
-$('space-res').style.display=state.spaceUnlocked?'flex':'none';
-sample();
-const pn=STOCKS_DEF.find(d=>d.id==='pncl'),tg=15+Math.log10(1+state.lifetimeSales)*14+state.prestigeLevel*5;pn.base=tg;
-const ps=state.stocks.pncl;ps.price=clamp(ps.price+(tg-ps.price)*.04,.4,8000);
-if(tick%20==0){let dv=0;STOCKS_DEF.forEach(d=>{if(d.sector!=='aerospace'&&d.sector!=='self')dv+=state.stocks[d.id].shares*state.stocks[d.id].price*.003});if(dv>.01){state.cash+=dv;logEvent('Dividends paid: +'+formatMoney(dv))}}
-if(now>nextNews){news();nextNews=now+R(25000,45000)}
-if(state.spaceUnlocked&&now>nextEvt){spaceEvent();nextEvt=now+R(50000,90000)}
-ACH.forEach(a=>{if(!X.ach[a[0]]&&a[2]()){X.ach[a[0]]=1;state.cash=clamp(state.cash+1000,0,1e15);toast('🏆 '+a[0]+'!');logEvent('Achievement: '+a[0])}});
-if(tick%5==0){const s=STOCKS_DEF.map(d=>{const c=X.c[d.id]||[],p=state.stocks[d.id].price,k=c.length>1?c[c.length-2][3]:p,ch=(p-k)/k*100;return '<span class="'+(ch>=0?'px-up':'px-dn')+'">'+d.ticker+' '+p.toFixed(2)+' '+(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(1)+'%</span>'}).join(' &nbsp;•&nbsp; ');
-$('px-tape-in').innerHTML=s+' &nbsp;•&nbsp; 📰 '+heads.join(' &nbsp;•&nbsp; 📰 ')}
-setH($('px-chips'),STOCKS_DEF.map(d=>'<button class="secondary-btn px-chip'+(X.sel===d.id?' on':'')+'" onclick="pxSel(\''+d.id+'\')">'+d.ticker+'</button>').join(''));
-const sd=STOCKS_DEF.find(d=>d.id===X.sel);if(sd)$('px-quote').textContent=sd.name+' $'+state.stocks[sd.id].price.toFixed(2);
-const lock=!state.cosmosUnlocked;
-setH($('px-mega'),'<div class="hint" style="margin-bottom:6px">Sold as bulk export contracts at 35% of your price · Total: <b>'+F(megaRate())+'/s</b></div>'+MEGA.map(m=>{const c=mc(m);return '<div class="mkt-card"><div class="mkt-title">'+m.i+' '+m.n+' ×'+(X.mega[m.id]||0)+'</div><div class="mkt-desc">+'+F(m.rate)+' pencils/s each</div><button class="buy-btn" '+(state.cash>=c&&!lock?'':'disabled')+' onclick="pxMega(\''+m.id+'\')">'+(lock?'Unlock Cosmos first':'Build — '+formatMoney(c))+'</button></div>'}).join(''));
-const e=ENG[X.engine];
-setH($('px-eng'),'<div class="material-row"><span>Current</span><span style="font-family:var(--mono)">'+(X.engine?ENG[X.engine-1].n+' (−'+Math.round(ENG[X.engine-1].b*50)+'% risk)':'Chemical Rockets')+'</span></div>'+(e?'<button class="buy-btn" style="margin-top:8px" '+(state.cash>=e.c?'':'disabled')+' onclick="pxEng()">'+e.n+' — '+formatMoney(e.c)+'</button>':'<p class="hint">Fully upgraded.</p>'));
-setH($('px-ach'),ACH.map(a=>'<div class="px-ach'+(X.ach[a[0]]?'':' off')+'"><span>'+(X.ach[a[0]]?'🏆':'🔒')+'</span><div><b>'+a[0]+'</b><div class="hint" style="margin:0">'+a[1]+'</div></div></div>').join(''));
-$('px-achn').textContent=Object.keys(X.ach).length+'/'+ACH.length;
-},1000);
-setInterval(()=>{const r=megaRate();if(r>0){const n=r*.25,rev=n*state.askingPrice*.35;state.totalProduced+=n;state.lifetimePencilsMade=(state.lifetimePencilsMade||0)+n;state.cash=clamp(state.cash+rev,0,1e15);state.lifetimeSales+=rev}},250);
-(function frame(t){drawMap(t);drawCandles();drawHeat();requestAnimationFrame(frame)})(0);
-renderAll();
-logEvent('Universe Update loaded: orbital map, candlesticks, megastructures & more!');
-})();
+logEvent('v8 update: multi-mission trajectories, interactive map, orbiters & unique upgrades loaded!');
 </script>
 </body>
 </html>

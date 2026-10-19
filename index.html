@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pencil Factory — Universal Tycoon v8</title>
+<title>Pencil Factory — Universal Tycoon v9</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{--bg:#0f0e0c;--bg-panel:#181512;--bg-card:#221e19;--bg-elevated:#2a251f;--bg-hover:#322c25;--border:#3a332b;--border-light:#4a4238;--text:#f3ebe0;--text-dim:#9a8d7a;--text-muted:#6b5f50;--accent:#e07a3d;--accent-soft:#d4a574;--accent-glow:rgba(224,122,61,0.35);--sage:#6f9b6a;--sage-bright:#9bc892;--teal:#5a8a8a;--cream:#f5e6c8;--rose:#c47b6a;--gold:#d4b483;--purple:#9b7b9b;--blue:#6b8f9e;--space:#4a6fa5;--space-bright:#7ba3d4;--font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;--mono:'SF Mono','Fira Code','Consolas',monospace;--radius:14px;--shadow:0 10px 32px rgba(0,0,0,0.45)}
@@ -832,7 +832,7 @@ document.getElementById('panel-'+id)?.classList.add('active');
 document.querySelectorAll(`.nav-btn[data-panel="${id}"]`).forEach(b=>b.classList.add('active'));
 if(id==='machines')renderMachines();if(id==='upgrades')renderUpgrades();if(id==='marketing')renderMarketing();
 if(id==='supply')renderSupply();if(id==='market')renderStocks();if(id==='analytics')updateCharts();
-if(id==='mission')renderMissionUI();if(id==='cosmos')renderColonies();
+if(id==='mission'){renderMissionUI();if(typeof renderRocketMarket==='function')renderRocketMarket();};if(id==='cosmos')renderColonies();
 }
 document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>switchPanel(btn.dataset.panel));});
 const mobileTabs=document.getElementById('mobile-tabs');
@@ -893,12 +893,20 @@ COLONIES.push(
 {id:'venus',name:'Venus Cloud City',icon:'🟡',baseRate:9000,mass:4.9e12,desc:'Floating pencil habitats in the clouds.'},
 {id:'ceres',name:'Ceres Mines',icon:'⚪',baseRate:16000,mass:9e8,desc:'Asteroid-belt graphite hub.'},
 {id:'pluto',name:'Pluto Works',icon:'🤍',baseRate:30000,mass:1.3e10,desc:'A frozen heart that sharpens.'},
-{id:'oort',name:'Oort Cloud Fleet',icon:'🌌',baseRate:75000,mass:1e13,desc:'A trillion comets turned to lead.'});
+{id:'eris',name:'Eris Outpost',icon:'💠',baseRate:48000,mass:1.7e10,desc:'Scattered-disk factory on the dwarf planet.'},
+{id:'sedna',name:'Sedna Works',icon:'🔴',baseRate:95000,mass:8e9,desc:'Extreme outer-system pencil refinery.'},
+{id:'oort',name:'Oort Cloud Fleet',icon:'🌌',baseRate:180000,mass:1e13,desc:'A trillion comets turned to lead.'},
+{id:'heliopause',name:'Heliopause Gate',icon:'🌀',baseRate:350000,mass:5e11,desc:'Boundary station at the edge of the solar wind.'},
+{id:'proxima',name:'Proxima Centauri Base',icon:'⭐',baseRate:2.5e6,mass:2e14,desc:'Interstellar pencil works around a red dwarf.'});
 MISSIONS.push(
 {id:'venus',name:'Venus Cloud Drop',desc:'Aerobrake into the clouds and seed floating factories.',cost:6e6,materials:20000,difficulty:0.6,reward:1.1e7,unlockColony:'venus',reqSold:1e9,formula:null},
 {id:'ceres',name:'Ceres Prospector',desc:'Land on the dwarf planet and tap the graphite veins.',cost:2.4e7,materials:40000,difficulty:0.64,reward:4.6e7,unlockColony:'ceres',reqSold:4e9,formula:null},
 {id:'pluto',name:'Pluto Flyby Factory',desc:'Build a robotic works at the edge of the Sun’s reach.',cost:9e7,materials:80000,difficulty:0.68,reward:1.8e8,unlockColony:'pluto',reqSold:1.5e10,formula:null},
-{id:'oort',name:'Oort Cloud Armada',desc:'Launch the swarm that converts comets into pencils.',cost:4e8,materials:150000,difficulty:0.72,reward:8e8,unlockColony:'oort',reqSold:6e10,formula:null});
+{id:'eris',name:'Eris Survey',desc:'Reach the scattered disk and claim Eris.',cost:2.2e8,materials:120000,difficulty:0.7,reward:4.5e8,unlockColony:'eris',reqSold:4e10,formula:null},
+{id:'sedna',name:'Sedna Deep Probe',desc:'Extreme elliptical transfer to Sedna.',cost:5e8,materials:200000,difficulty:0.74,reward:1.2e9,unlockColony:'sedna',reqSold:1e11,formula:null},
+{id:'oort',name:'Oort Cloud Armada',desc:'Launch the swarm that converts comets into pencils.',cost:1.2e9,materials:350000,difficulty:0.76,reward:3e9,unlockColony:'oort',reqSold:3e11,formula:null},
+{id:'heliopause',name:'Heliopause Crossing',desc:'Push past the termination shock to the heliopause.',cost:4e9,materials:600000,difficulty:0.8,reward:1.1e10,unlockColony:'heliopause',reqSold:1e12,formula:null},
+{id:'proxima',name:'Proxima Transfer',desc:'Interstellar cruise to Proxima Centauri. Gravity assists optional.',cost:2.5e10,materials:2e6,difficulty:0.88,reward:8e10,unlockColony:'proxima',reqSold:8e12,formula:null});
 COLONIES.forEach(c=>{if(!state.colonies[c.id])state.colonies[c.id]={owned:false,progress:0,rateMult:1}});
 STOCKS_DEF.push(
 {id:'pncl',ticker:'PNCL',name:'Your Company',base:40,vol:0.03,sens:0,sector:'self'},
@@ -907,6 +915,39 @@ STOCKS_DEF.push(
 STOCKS_DEF.forEach(s=>{if(!state.stocks[s.id])state.stocks[s.id]={price:s.base,shares:0,history:[s.base]}});
 if(typeof conversionChart!=='undefined'&&conversionChart)conversionChart.data.labels=COLONIES.map(c=>c.name);
 const MEGA=[{id:'foundry',n:'Orbital Pencil Foundry',i:'🛰️',base:2.5e5,rate:400},{id:'dyson',n:'Dyson Swarm',i:'☀️',base:5e7,rate:3e4},{id:'matrioshka',n:'Matrioshka Brain',i:'🧠',base:5e9,rate:2.5e6},{id:'sing',n:'Pencil Singularity',i:'🕳️',base:2e12,rate:4e8}];
+
+/* ---------- Rocket Market ---------- */
+const ROCKETS=[
+{id:'scrap',name:'Scrap Hopper',icon:'🛢️',cost:0,speed:0.72,acc:0.55,heat:0.45,hp:70,wobble:0.9,look:'scrap',desc:'Free starter. Wobbly, leaky, and the guidance computer was found in a dumpster.'},
+{id:'sparrow',name:'Sparrow I',icon:'🕊️',cost:8500,speed:1.0,acc:0.85,heat:0.7,hp:100,wobble:0.25,look:'sparrow',desc:'Light workhorse. Decent accuracy, average heat shielding.'},
+{id:'falcon',name:'Falcon Arc',icon:'🦅',cost:65000,speed:1.35,acc:1.1,heat:0.9,hp:140,wobble:0.1,look:'falcon',desc:'Fast transfer burns. Strong trajectory computer.'},
+{id:'aegis',name:'Aegis Shield',icon:'🛡️',cost:220000,speed:1.05,acc:1.0,heat:1.45,hp:220,wobble:0.05,look:'aegis',desc:'Heavy heat tiles and thick hull. Survives close solar passes.'},
+{id:'needle',name:'Needle X',icon:'📌',cost:480000,speed:1.8,acc:1.35,heat:0.85,hp:110,wobble:0.08,look:'needle',desc:'Precision navigation and high cruise speed. Fragile hull.'},
+{id:'atlas',name:'Atlas Prime',icon:'🗿',cost:2.5e6,speed:1.5,acc:1.25,heat:1.25,hp:280,wobble:0.02,look:'atlas',desc:'Flagship. Balanced speed, heat, and armor for deep space.'},
+{id:'nova',name:'Nova Drift',icon:'✨',cost:1.8e7,speed:2.2,acc:1.5,heat:1.6,hp:320,wobble:0,look:'nova',desc:'Interstellar-ready. Auto-guidance and radiation armor.'}
+];
+if(!X.rocket)X.rocket='scrap';
+if(!X.ownedRockets)X.ownedRockets={scrap:true};
+window.pxBuyRocket=id=>{
+  const r=ROCKETS.find(x=>x.id===id);if(!r)return;
+  if(X.ownedRockets[id]){X.rocket=id;toast('Selected '+r.name);renderRocketMarket();return;}
+  if(state.cash<r.cost){toast('Need '+formatMoney(r.cost));return;}
+  state.cash-=r.cost;X.ownedRockets[id]=true;X.rocket=id;
+  logEvent('Purchased rocket: '+r.name);toast(r.icon+' '+r.name+' acquired!');
+  renderResources();renderRocketMarket();
+};
+window.pxSelectRocket=id=>{if(!X.ownedRockets[id])return;X.rocket=id;toast('Active: '+ROCKETS.find(x=>x.id===id).name);renderRocketMarket();};
+function getRocket(){return ROCKETS.find(r=>r.id===X.rocket)||ROCKETS[0];}
+function renderRocketMarket(){
+  const el=$('px-rockets');if(!el)return;
+  const cur=getRocket();
+  el.innerHTML='<div class="hint" style="margin-bottom:8px">Active: <b>'+cur.icon+' '+cur.name+'</b> · Spd '+cur.speed.toFixed(2)+'× · Acc '+Math.round(cur.acc*100)+'% · Heat '+Math.round(cur.heat*100)+'% · HP '+cur.hp+'</div>'+
+    ROCKETS.map(r=>{
+      const owned=!!X.ownedRockets[r.id],active=X.rocket===r.id;
+      const can=owned||state.cash>=r.cost;
+      return '<div class="mkt-card'+(active?' px-chip on':'')+'" style="'+(active?'border-color:var(--accent)':'')+'"><div class="mkt-title">'+r.icon+' '+r.name+(active?' ✓':'')+'</div><div class="mkt-desc">'+r.desc+'</div><div style="font-family:var(--mono);font-size:.72rem;color:var(--space-bright);margin:4px 0">Spd '+r.speed.toFixed(2)+'× · Acc '+Math.round(r.acc*100)+'% · Heat resist '+Math.round(r.heat*100)+'% · HP '+r.hp+(r.wobble>0.3?' · WOBBLY':'')+'</div><button class="buy-btn" style="width:auto;padding:4px 12px;margin-top:4px" '+(can?'':'disabled')+' onclick="'+(owned?'pxSelectRocket':'pxBuyRocket')+'(\''+r.id+'\')">'+(active?'Selected':owned?'Select':formatMoney(r.cost))+'</button></div>';
+    }).join('');
+}
 const mc=m=>Math.floor(m.base*Math.pow(1.55,X.mega[m.id]||0));
 const megaRate=()=>MEGA.reduce((s,m)=>s+m.rate*(X.mega[m.id]||0),0)*state.prestigeMult;
 const ENG=[{n:'Ion Drive',c:1.5e5,b:.12},{n:'Fusion Torch',c:4e6,b:.25},{n:'Antimatter Core',c:3e8,b:.4}];
@@ -915,7 +956,7 @@ window.pxEng=()=>{const e=ENG[X.engine];if(!e||state.cash<e.c)return;state.cash-
 window.pxSel=id=>{X.sel=id};
 document.body.insertAdjacentHTML('beforeend','<div class="px-tape"><span class="px-tape-in" id="px-tape-in"></span></div>');
 $('panel-market').insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h3>🕯️ Candlestick Terminal <span id="px-quote" style="margin-left:auto;font-family:var(--mono);font-size:.75rem;color:var(--text-dim)"></span></h3><div id="px-chips" class="actions-bar" style="margin:0 0 8px"></div><canvas id="px-candle" class="px-canvas" width="720" height="260"></canvas><p class="hint">Each candle = 8s. Dashed line = 8-candle average. Hover for crosshair. PNCL is your own company — it follows your sales.</p></div>');
-$('space-status').insertAdjacentHTML('afterend','<div id="px-mapwrap"></div><div class="card" style="margin-bottom:12px"><h3>🔥 Engines <span class="hint" style="margin-left:auto">lower mission risk</span></h3><div id="px-eng"></div></div>');
+$('space-status').insertAdjacentHTML('afterend','<div id="px-mapwrap"></div><div class="card" style="margin-bottom:12px"><h3>🚀 Rocket Hangar</h3><div id="px-rockets"></div></div><div class="card" style="margin-bottom:12px"><h3>🔥 Engines <span class="hint" style="margin-left:auto">lower mission risk</span></h3><div id="px-eng"></div></div>');
 $('colonies-list').insertAdjacentHTML('afterend','<div class="card" style="margin-top:12px"><h3>🏗️ Megastructures</h3><div id="px-mega"></div></div>');
 $('panel-office').insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><h3>🏆 Achievements <span id="px-achn" class="hint" style="margin-left:auto"></span></h3><div id="px-ach"></div></div>');
 $('overlay-thermal').querySelector('.telemetry').insertAdjacentHTML('beforebegin','<canvas id="px-heat" width="380" height="70" style="width:100%;border-radius:8px;margin:6px 0"></canvas>');
@@ -955,7 +996,11 @@ else if(k==1){const v=Math.max(5000,state.cash*.04);state.cash=clamp(state.cash+
 else if(k==2){state.materials=Math.min(5e6,state.materials+3000);m='🛸 Derelict freighter salvaged: +3,000 materials.'}
 else{['aero','orbit','lunar','dyson','warp'].forEach(id=>{state.stocks[id].price*=.9});m='🌞 Solar flare! Aerospace stocks dip.';meteors(8)}
 toast(m);logEvent(m)}
-const ACH=[['First Thousand','Sell 1,000 pencils',()=>state.totalSold>=1e3],['Millionaire','Hold $1M cash',()=>state.cash>=1e6],['Rocket Scientist','Land a mission',()=>state.missionsSuccess>=1],['Space Baron','Unlock Cosmos',()=>state.cosmosUnlocked],['Wall Street','Portfolio $100K',()=>getPortfolioValue()>=1e5],['Planet Eater','Fully convert a world',()=>Object.values(state.colonies).some(c=>c.progress>=1)],['Dyson Dreamer','Build a Dyson Swarm',()=>(X.mega.dyson||0)>=1],['Reborn','Prestige once',()=>state.prestigeLevel>=1],['Billionaire','Hold $1B cash',()=>state.cash>=1e9],['Fleet Commander','Have 3 missions in flight at once',()=>(X.fl||[]).length>=3],['Deep Space','Complete a mission to Pluto or beyond',()=>(X.sats||[]).some(s=>s.tgt==='pluto'||s.tgt==='kuiper'||s.tgt==='oort')]];
+const ACH=[['First Thousand','Sell 1,000 pencils',()=>state.totalSold>=1e3],['Millionaire','Hold $1M cash',()=>state.cash>=1e6],['Rocket Scientist','Land a mission',()=>state.missionsSuccess>=1],['Space Baron','Unlock Cosmos',()=>state.cosmosUnlocked],['Wall Street','Portfolio $100K',()=>getPortfolioValue()>=1e5],['Planet Eater','Fully convert a world',()=>Object.values(state.colonies).some(c=>c.progress>=1)],['Dyson Dreamer','Build a Dyson Swarm',()=>(X.mega.dyson||0)>=1],['Reborn','Prestige once',()=>state.prestigeLevel>=1],['Billionaire','Hold $1B cash',()=>state.cash>=1e9],['Fleet Commander','Have 3 missions in flight at once',()=>(X.fl||[]).length>=3],['Deep Space','Complete a mission to Pluto or beyond',()=>(X.sats||[]).some(s=>s.tgt==='pluto'||s.tgt==='kuiper'||s.tgt==='oort')],
+['Rocket Collector','Own 4 rocket models',()=>Object.keys(X.ownedRockets||{}).length>=4],
+['Slingshot Ace','Use a gravity assist',()=>!!X.ach._sling],
+['Interstellar','Reach Proxima Centauri',()=>(X.sats||[]).some(s=>s.tgt==='proxima')||(state.colonies.proxima&&state.colonies.proxima.owned)],
+['Hull Survivor','Finish a mission below 30% HP',()=>!!X.ach._hull]];
 let tick=0,nextNews=Date.now()+25000,nextEvt=Date.now()+50000;
 setInterval(()=>{
 tick++;const now=Date.now();
@@ -1022,45 +1067,60 @@ const X=state.x;if(!X)return;
 const $=id=>document.getElementById(id),TAU=Math.PI*2,R=(a,b)=>a+Math.random()*(b-a),cl=(v,a,b)=>Math.max(a,Math.min(b,v)),ease=u=>u*u*(3-2*u);
 X.fl=(X.fl||[]).filter(f=>f&&f.ph!=='dead');X.sats=X.sats||[];X.simT=X.simT||0;X.uid=X.uid||1;
 state.currentMission=null;
-const MAXF=8,ENGB=[.12,.25,.4],SUNR=16,LAUNCH_T=4,PARK_T=9,BURN_T=3,ORB_T=12;
+const MAXF=8,ENGB=[.12,.25,.4],SUNR=14,LAUNCH_T=4,PARK_T=9,BURN_T=3.2,ORB_T=12;
 const mlog=m=>missionLog(m),M=id=>MISSIONS.find(x=>x.id===id);
 const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')'};
 const fmtT=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const getRk=()=>(typeof getRocket==='function'?getRocket():{id:'scrap',speed:0.72,acc:0.55,heat:0.45,hp:70,wobble:0.9,look:'scrap'});
 
-/* ---------- solar system data ---------- */
+/* ---------- solar system data (spread-out, more realistic scale) ---------- */
 const B={},BL=[];
-const per=a=>150*Math.pow(a/108,1.5);
+/* AU scale: Earth at 220 map units ≈ 1 AU */
+const AU=220;
+const per=a=>180*Math.pow(Math.max(a,1)/AU,1.5);
 function mk(id,name,a,r,c1,c2,o){const h=id.split('').reduce((s,c)=>s+c.charCodeAt(0),0);const b=Object.assign({id,name,a,r,c1,c2,type:'planet',per:per(a),th:(h*1.7)%TAU,fact:''},o||{});B[id]=b;BL.push(b);return b}
-B.sun={id:'sun',name:'The Sun',a:0,r:SUNR,per:1e12,th:0,type:'star',fact:'Fly into it and your spacecraft will not be coming back.'};
-mk('mercury','Mercury',48,2.4,'#d9cfc2','#5e544a',{fact:'Scorched, cratered and fast.'});
-mk('venus','Venus',76,4.2,'#f7e2a8','#a8783c',{fact:'Thick clouds and crushing heat.',atm:'rgba(255,220,140,.35)'});
-mk('earth','Earth',108,4.4,'#8cc4ff','#173a78',{fact:'Home. Your launch pad.',atm:'rgba(120,180,255,.4)'});
-mk('mars','Mars',150,3.5,'#f39a6a','#6e2a16',{fact:'Cold red desert with a polar cap.',atm:'rgba(255,150,100,.18)'});
-mk('ceres','Ceres',196,2.2,'#cfcac2','#5e5850',{type:'dwarf',fact:'Dwarf planet in the asteroid belt.'});
-mk('jupiter','Jupiter',285,11,'#f3dcb8','#8a5a34',{fact:'Gas giant. Its gravity bends everything.'});
-mk('saturn','Saturn',380,9,'#f6e6b0','#8c7440',{fact:'Gas giant wearing the famous rings.'});
-mk('uranus','Uranus',455,6,'#c4f2f2','#3d8c96',{fact:'Ice giant that rolls on its side.',atm:'rgba(150,240,240,.25)'});
-mk('neptune','Neptune',520,6,'#86a8ff','#1f3a9a',{fact:'Deep blue, with supersonic winds.',atm:'rgba(100,140,255,.3)'});
-mk('pluto','Pluto',590,2.2,'#f0e3d3','#7a6a5c',{type:'dwarf',fact:'A frozen heart at the system\u2019s edge.'});
-mk('kuiper','Kuiper Object',655,2.6,'#e0b0a8','#5a3a38',{type:'kbo',fact:'An icy relic inside the Kuiper Belt.'});
-mk('oort','Oort Comet',1150,3,'#d8f2ff','#3a6a8a',{type:'comet',fact:'A giant comet deep in the Oort Cloud, almost a light-year away in spirit.'});
-mk('moon','The Moon',17,1.4,'#ececec','#6b6b6b',{par:'earth',type:'moon',per:22,fact:'Earth\u2019s only natural satellite.'});
-mk('io','Io',16,1.3,'#f3e07a','#8a6a1a',{par:'jupiter',type:'moon',per:14,fact:'Volcanic moon of Jupiter.'});
-mk('europa','Europa',21,1.5,'#e8dccb','#7a6a58',{par:'jupiter',type:'moon',per:24,fact:'Ice shell hiding an ocean.'});
-mk('ganymede','Ganymede',27,2,'#c8bfb2','#5c5348',{par:'jupiter',type:'moon',per:40,fact:'Largest moon in the system.'});
-mk('enceladus','Enceladus',18,1,'#fafcff','#8a9aa8',{par:'saturn',type:'moon',per:18,fact:'Geysers spray from its south pole.'});
-mk('titan','Titan',25,2.2,'#f0b860','#7a4a1a',{par:'saturn',type:'moon',per:36,fact:'Hazy moon with methane lakes.'});
+B.sun={id:'sun',name:'The Sun',a:0,r:SUNR,per:1e12,th:0,type:'star',fact:'Get too close and cheap rockets melt.'};
+mk('mercury','Mercury',0.39*AU,2.0,'#d9cfc2','#5e544a',{fact:'Scorched, cratered and fast. Dangerous solar heat zone.'});
+mk('venus','Venus',0.72*AU,3.6,'#f7e2a8','#a8783c',{fact:'Thick clouds and crushing heat.',atm:'rgba(255,220,140,.35)'});
+mk('earth','Earth',1.0*AU,3.8,'#8cc4ff','#173a78',{fact:'Home. Your launch pad.',atm:'rgba(120,180,255,.4)'});
+mk('mars','Mars',1.52*AU,2.9,'#f39a6a','#6e2a16',{fact:'Cold red desert with a polar cap.',atm:'rgba(255,150,100,.18)'});
+mk('ceres','Ceres',2.77*AU,1.8,'#cfcac2','#5e5850',{type:'dwarf',fact:'Dwarf planet in the asteroid belt.'});
+mk('jupiter','Jupiter',5.2*AU,9.5,'#f3dcb8','#8a5a34',{fact:'Gas giant. Gravity wells for slingshots.',gWell:true});
+mk('saturn','Saturn',9.5*AU,7.8,'#f6e6b0','#8c7440',{fact:'Gas giant with rings. Strong gravity assist.',gWell:true});
+mk('uranus','Uranus',19.2*AU,5.2,'#c4f2f2','#3d8c96',{fact:'Ice giant that rolls on its side.',atm:'rgba(150,240,240,.25)',gWell:true});
+mk('neptune','Neptune',30.1*AU,5.0,'#86a8ff','#1f3a9a',{fact:'Deep blue, with supersonic winds.',atm:'rgba(100,140,255,.3)',gWell:true});
+mk('pluto','Pluto',39.5*AU,1.8,'#f0e3d3','#7a6a5c',{type:'dwarf',fact:"A frozen heart at the system's edge."});
+mk('kuiper','Kuiper Object',45*AU,2.0,'#e0b0a8','#5a3a38',{type:'kbo',fact:'An icy relic inside the Kuiper Belt.'});
+mk('eris','Eris',68*AU,1.9,'#c8d4e8','#4a5a70',{type:'dwarf',fact:'Scattered-disk dwarf. Distant and cold.'});
+mk('sedna','Sedna',150*AU,1.7,'#e07050','#5a2010',{type:'dwarf',fact:'Extreme elliptical orbit. Deep outer solar system.'});
+mk('oort','Oort Comet',320*AU,2.4,'#d8f2ff','#3a6a8a',{type:'comet',fact:'A giant comet deep in the Oort Cloud.'});
+mk('heliopause','Heliopause',420*AU,3.5,'#a0b8ff','#304080',{type:'boundary',fact:'Where the solar wind meets interstellar space.'});
+mk('proxima','Proxima Centauri',980*AU,11,'#ff6a4a','#8a1010',{type:'star',fact:'Nearest star. Red dwarf with your interstellar base.'});
+/* moons */
+mk('moon','The Moon',12,1.1,'#ececec','#6b6b6b',{par:'earth',type:'moon',per:28,fact:"Earth's only natural satellite."});
+mk('phobos','Phobos',5.5,0.55,'#c4b8a8','#5a5048',{par:'mars',type:'moon',per:10,fact:'Tiny potato-shaped moon of Mars.'});
+mk('deimos','Deimos',8.5,0.45,'#b8aea0','#4a443c',{par:'mars',type:'moon',per:18,fact:'Smaller outer moon of Mars.'});
+mk('io','Io',14,1.0,'#f3e07a','#8a6a1a',{par:'jupiter',type:'moon',per:14,fact:'Volcanic moon of Jupiter.'});
+mk('europa','Europa',18,1.2,'#e8dccb','#7a6a58',{par:'jupiter',type:'moon',per:24,fact:'Ice shell hiding an ocean.'});
+mk('ganymede','Ganymede',24,1.6,'#c8bfb2','#5c5348',{par:'jupiter',type:'moon',per:40,fact:'Largest moon in the system.'});
+mk('callisto','Callisto',31,1.4,'#a89888','#4a4038',{par:'jupiter',type:'moon',per:55,fact:'Heavily cratered outer Galilean moon.'});
+mk('enceladus','Enceladus',15,0.8,'#fafcff','#8a9aa8',{par:'saturn',type:'moon',per:18,fact:'Geysers spray from its south pole.'});
+mk('titan','Titan',22,1.7,'#f0b860','#7a4a1a',{par:'saturn',type:'moon',per:36,fact:'Hazy moon with methane lakes.'});
+mk('triton','Triton',16,1.2,'#d0e0f0','#5a7088',{par:'neptune',type:'moon',per:30,fact:'Retrograde moon of Neptune.'});
 const OBST=BL.filter(b=>!b.par);
-const MT={leo:'earth',lunar:'moon',mars:'mars',europa:'europa',titan:'titan',kuiper:'kuiper',venus:'venus',ceres:'ceres',pluto:'pluto',oort:'oort'};
-const OR={earth:8.5,moon:3.6,mars:6.5,europa:4,titan:4.8,kuiper:5,venus:7,ceres:4.5,pluto:4.5,oort:5};
-const COL={leo:'#8fd3ff',lunar:'#e4e4f0',mars:'#ff8a5c',europa:'#9fe0ff',titan:'#ffc24d',kuiper:'#c9a0ff',venus:'#ffe08a',ceres:'#b8c4cf',pluto:'#f2d6c0',oort:'#7ad1ff'};
-const PARK=B.earth.r+4.1;
+const MT={leo:'earth',lunar:'moon',mars:'mars',europa:'europa',titan:'titan',kuiper:'kuiper',venus:'venus',ceres:'ceres',pluto:'pluto',oort:'oort',eris:'eris',sedna:'sedna',heliopause:'heliopause',proxima:'proxima'};
+const OR={earth:7,moon:3,mars:5.5,europa:3.5,titan:4,kuiper:4.5,venus:6,ceres:4,pluto:4,oort:5,eris:4.5,sedna:4.5,heliopause:6,proxima:14};
+const COL={leo:'#8fd3ff',lunar:'#e4e4f0',mars:'#ff8a5c',europa:'#9fe0ff',titan:'#ffc24d',kuiper:'#c9a0ff',venus:'#ffe08a',ceres:'#b8c4cf',pluto:'#f2d6c0',oort:'#7ad1ff',eris:'#a0c0e8',sedna:'#ff7a50',heliopause:'#8090ff',proxima:'#ff5a3a'};
+/* hazard zones: [r0, r1, type, intensity] */
+const HAZARDS=[[0.9*AU,1.35*AU,'belt',0.35],[38*AU,55*AU,'kuiper',0.55],[300*AU,360*AU,'oort',0.25]];
+const HEAT_RADIUS=0.55*AU; /* inside this, solar heat rises fast */
+const PARK=B.earth.r+3.5;
 const BP={sun:{x:0,y:0}};
 function posAt(id,t){const b=B[id],th=b.th+TAU*t/b.per;if(b.par){const p=posAt(b.par,t);return{x:p.x+Math.cos(th)*b.a,y:p.y+Math.sin(th)*b.a}}return{x:Math.cos(th)*b.a,y:Math.sin(th)*b.a}}
 function updBP(){for(const b of BL)BP[b.id]=posAt(b.id,X.simT)}
 updBP();
 const belt=(n,r0,r1)=>{const k=[[],[],[]];for(let i=0;i<n;i++){const r=r0+(r1-r0)*Math.pow(Math.random(),.9),a=Math.random()*TAU;k[i%3].push([Math.cos(a)*r,Math.sin(a)*r,Math.random()*1.1+.25])}return k};
-const AST=belt(900,172,222),KUI=belt(1500,560,740),OORT=belt(3400,930,1420);
+const AST=belt(1100,1.9*AU,3.3*AU),KUI=belt(1800,38*AU,55*AU),OORT=belt(2800,280*AU,380*AU);
 const stars=Array.from({length:420},()=>[Math.random(),Math.random(),Math.random()*1.6+.4,1+Math.floor(Math.random()*3),Math.random()]);
 
 /* ---------- flight planning ---------- */
@@ -1075,7 +1135,7 @@ T=Math.round(T);const e=endFor(T);
 return{cen:geo?'e':'s',t0,T,r0,th0,r1:e.r1,dth:e.dth,dev:0,aim};
 }
 function pathPos(f,s){const p=f.path,u=ease(s),w=.55*s+.45*u;let r=p.r0+(p.r1-p.r0)*u;if(p.dev)r*=1-p.dev*Math.pow(Math.sin(Math.PI*u),.7);const th=p.th0+p.dth*w;const c=p.cen==='e'?posAt('earth',p.t0+s*p.T):{x:0,y:0};return{x:c.x+Math.cos(th)*r,y:c.y+Math.sin(th)*r}}
-function est(m){const tgt=MT[m.id],geo=tgt==='earth'||tgt==='moon',E=posAt('earth',X.simT+16);return plan(tgt,tgt,geo,X.simT+16,E.x+13.5,E.y,false).T}
+function est(m){const tgt=MT[m.id],geo=tgt==='earth'||tgt==='moon',E=posAt('earth',X.simT+16);const T=plan(tgt,tgt,geo,X.simT+16,E.x+13.5,E.y,false).T;const rk=getRk();return Math.max(8,T/Math.max(0.5,rk.speed));}
 function pickObst(f){const tb=B[f.tgt],ta=(tb.par?B[tb.par]:tb).a;const c=OBST.filter(b=>b.id!=='earth'&&b.id!==f.tgt&&b.id!==tb.par&&b.type!=='comet'&&b.type!=='kbo');c.sort((a,b)=>Math.abs(a.a-ta)-Math.abs(b.a-ta));return c[Math.floor(Math.random()*Math.min(2,c.length))].id}
 
 /* ---------- effects ---------- */
@@ -1094,8 +1154,11 @@ if(X.fl.length>=MAXF){toast('Launch pads busy — max '+MAXF+' missions at once'
 if(!canLaunch(m))return;
 state.cash-=m.cost;state.materials-=m.materials;
 const tgt=MT[m.id]||'mars',E=BP.earth;
-const f={uid:X.uid++,mid:m.id,name:m.name,tgt,ph:'launch',pt:0,la:R(0,TAU),phi:0,rr:B.earth.r,risk:0,need:null,wait:false,x:E.x,y:E.y,ang:0,ev:0,s:0,fate:'',failAt:-1,estT:est(m),fl:0};
+const rk=getRk();
+const f={uid:X.uid++,mid:m.id,name:m.name,tgt,ph:'launch',pt:0,la:R(0,TAU),phi:0,rr:B.earth.r,risk:0,need:null,wait:false,x:E.x,y:E.y,ang:0,ev:0,s:0,fate:'',failAt:-1,estT:est(m),fl:0,
+  rocket:rk.id,look:rk.look,spd:rk.speed,acc:rk.acc,heatRes:rk.heat,hp:rk.hp,maxHp:rk.hp,wobble:rk.wobble,heat:0,burned:false};
 f.phi=f.la;X.fl.push(f);TR.set(f.uid,[]);
+mlog(m.name+' flying '+rk.name+' (HP '+rk.hp+')');
 mlog('Launch: '+m.name+' lifting off from Earth');toast('🚀 '+m.name+' launched!');banner('🚀 '+m.name+' — liftoff','');
 sel={t:'f',id:f.uid};focus={t:'f',id:f.uid};mode='cinema';camT=null;
 const st=$('px-stage');if(st&&st.scrollIntoView)st.scrollIntoView({behavior:'smooth',block:'center'});
@@ -1131,22 +1194,58 @@ function beginCruise(f){
 const m=M(f.mid),geo=f.tgt==='earth'||f.tgt==='moon';
 const eb=X.engine?ENGB[X.engine-1]:0,risk=(f.risk||0)-eb*.5;
 const k=state.autopilot?.55:state.autoCool?.7:.65;
-const pOk=cl(1-(state.autopilot?m.difficulty:(m.difficulty+risk))*k,.04,.985);
+const rkAcc=(f.acc||0.7);const pOk=cl(1-(state.autopilot?m.difficulty:(m.difficulty+risk))*k*(1.15-rkAcc*0.35),.04,.99);
 let aim=f.tgt,mode_='ok';
 if(Math.random()>=pOk){const r=Math.random();if(geo||r<.3)mode_='eng';else if(r<.65)mode_='sun';else{mode_='planet';aim=pickObst(f)}}
 f.fate=mode_;
 const p=plan(f.tgt,aim,geo,X.simT,f.x,f.y,mode_==='planet');
 if(mode_==='sun')p.dev=cl(1-5/((p.r0+p.r1)/2),.5,.96);
 if(mode_==='eng')f.failAt=R(.2,.85);
-f.path=p;f.ph='cruise';f.pt=0;f.cx=undefined;f.ev=0;f.s=0;
+p.T=Math.max(6,p.T/Math.max(0.45,f.spd||1));f.path=p;f.ph='cruise';f.pt=0;f.cx=undefined;f.ev=0;f.s=0;
 mlog(f.name+': trans-'+B[f.tgt].name+' injection burn complete. Cruise '+fmtT(p.T)+'.');
 banner('\ud83d\udef0\ufe0f '+f.name+' \u2014 trajectory change, heading for '+B[f.tgt].name,'');
 ring(f.x,f.y,'#ffd37a',9,1.2,2);
+}
+
+function applyHazards(f,dt){
+  if(f.ph==='dead')return;
+  const dSun=Math.hypot(f.x,f.y);
+  /* solar heat */
+  if(dSun<HEAT_RADIUS){
+    const intensity=Math.pow(1-dSun/HEAT_RADIUS,1.4);
+    const heatGain=(8+intensity*55)/(0.35+f.heatRes)*dt;
+    f.heat=Math.min(100,f.heat+heatGain);
+    if(f.heat>40&&Math.random()<dt*0.4){
+      const dmg=(0.8+intensity*3.5)/(0.4+f.heatRes);
+      f.hp-=dmg;
+      if(!(f.ev&16)){f.ev|=16;mlog(f.name+': ⚠ solar heating — hull '+Math.round(f.hp)+'/'+f.maxHp);banner('☀ '+f.name+' overheating near the Sun!','bad');}
+    }
+    if(f.heat>=98){f.boom='incinerated by solar heat — hull melted';return;}
+  }else{
+    f.heat=Math.max(0,f.heat-6*dt*f.heatRes);
+  }
+  /* debris belts */
+  for(const [r0,r1,typ,inten] of HAZARDS){
+    if(dSun>=r0&&dSun<=r1){
+      const hitChance=inten*(1.1-Math.min(1,f.acc))*dt*0.9;
+      if(Math.random()<hitChance){
+        const dmg=(0.4+Math.random()*1.8)*(typ==='kuiper'?1.4:1)/(0.5+f.acc*0.5);
+        f.hp-=dmg;
+        if(Math.random()<0.25){mlog(f.name+': micrometeoroid hit (−'+dmg.toFixed(1)+' HP)');fx({k:'sp',x:f.x,y:f.y,vx:R(-2,2),vy:R(-2,2),life:0.8,col:'#c8c8c8',sz:1.5});}
+      }
+    }
+  }
+  /* wobble on bad rockets */
+  if(f.wobble>0.2&&f.ph==='cruise'&&f.path){
+    f.path.dev=(f.path.dev||0)+Math.sin(X.simT*3+f.uid)*f.wobble*0.002*dt;
+  }
+  if(f.hp<=0){f.boom='hull breach — structural failure';}
 }
 function step(f,dt){
 if(f.ph==='dead'){f.pt+=dt;if(f.pt>3&&!f.done){f.done=1;X.fl=X.fl.filter(x=>x!==f);TR.delete(f.uid);resolveF(f,false,f.why);if(sel&&sel.t==='f'&&sel.id===f.uid)sel=null;if(focus&&focus.t==='f'&&focus.id===f.uid){focus=null;mode='free'}}return}
 if(f.wait)return;
 f.fl=Math.max(0,(f.fl||0)-dt);
+applyHazards(f,dt);if(f.ph==='dead')return;
 if(f.boom){explode(f,f.boom);return}
 const E=BP.earth;
 if(f.ph==='launch'){
@@ -1167,7 +1266,13 @@ if(u>=1)beginCruise(f);
 const p=f.path,s=(X.simT-p.t0)/p.T;f.s=s;const sc=cl(s,0,1),pos=pathPos(f,sc);f.x=pos.x;f.y=pos.y;
 const p2=pathPos(f,Math.min(1,sc+.003));const a=Math.atan2(p2.y-pos.y,p2.x-pos.x);if(isFinite(a)&&(p2.x!==pos.x||p2.y!==pos.y))f.ang=a;
 f.thr=f.fl>0?1.2:0;trailPush(f,p.cen==='e'?'earth':'sun');
-if(!(f.ev&1)&&s>.22){f.ev|=1;f.fl=2.8;if(f.fate==='sun'||f.fate==='planet'){mlog(f.name+': \u26a0 NAV ANOMALY \u2014 trajectory diverging!');ring(f.x,f.y,'#ff5a3a',14,1.6,3);banner('\u26a0 '+f.name+': navigation anomaly!','bad')}else{mlog(f.name+': mid-course correction burn');ring(f.x,f.y,'#9fc0ff',12,1.4,2)}}
+if(!(f.ev&1)&&s>.22){f.ev|=1;f.fl=2.8;if(f.fate==='sun'||f.fate==='planet'){mlog(f.name+': \u26a0 NAV ANOMALY \u2014 trajectory diverging!');ring(f.x,f.y,'#ff5a3a',14,1.6,3);banner('\u26a0 '+f.name+': navigation anomaly!','bad')}else{
+  /* gravity assist check near gas giants */
+  let assisted=false;
+  for(const b of OBST){if(!b.gWell)continue;const p=BP[b.id];const dist=Math.hypot(f.x-p.x,f.y-p.y);
+    if(dist<b.r*8+40){assisted=true;f.path.T*=0.82;mlog(f.name+': gravity assist at '+b.name+'! Transfer shortened.');ring(p.x,p.y,'#a0e0ff',b.r*4,2.2,2.5);banner('🌀 '+f.name+' slingshot at '+b.name+'!','good');X.ach._sling=1;break;}}
+  if(!assisted){mlog(f.name+': mid-course correction burn');ring(f.x,f.y,'#9fc0ff',12,1.4,2)}
+}}
 if(!(f.ev&2)&&s>.5){f.ev|=2;mlog(f.name+': deep-space comms check nominal');ring(f.x,f.y,'#7ad1ff',20,2,1.5)}
 if(!(f.ev&4)&&s>.8){f.ev|=4;f.fl=3;mlog(f.name+': braking burn for arrival');ring(f.x,f.y,'#ffd37a',10,1.4,2)}
 if(f.failAt>0&&s>=f.failAt){explode(f,'main engine failure \u2014 vehicle broke apart');return}
@@ -1201,6 +1306,7 @@ X.sats.push({tgt:f.tgt,nm:m.name,rr:(f.orr||5)*.88+R(0,1.5),ph:f.phi,w:R(.7,1.3)
 if(X.sats.length>60)X.sats.shift();
 ring(C.x,C.y,'#6fcf8a',B[f.tgt].r*3+6,2,2.5);fx({k:'tx',x:f.x,y:f.y,txt:'\u2714 '+f.name+' complete',life:4.5,col:'#9bf0b0'});
 banner('\u2705 '+f.name+' \u2014 mission complete! +'+formatMoney(m.reward),'good');
+if(f.hp!==undefined&&f.maxHp&&f.hp/f.maxHp<0.3){X.ach._hull=1;mlog(f.name+': survived with critical hull!');}
 if(focus&&focus.t==='f'&&focus.id===f.uid){focus={t:'b',id:f.tgt};mode='follow'}
 if(sel&&sel.t==='f'&&sel.id===f.uid)sel={t:'b',id:f.tgt};
 resolveF(f,true);
@@ -1265,8 +1371,8 @@ let W=800,H=500,dpr=1,mouse={x:-1,y:-1},hover=null,homed=false,last=0;
 const cam={x:0,y:0,z:.9};let mode='free',focus=null,camT=null,zT=null,warp=1,showL=true,showO=true,sel=null,miniDrag=false;
 const WARPS=[1,2,5,10,25];
 const sx=x=>(x-cam.x)*cam.z+W/2,sy=y=>(y-cam.y)*cam.z+H/2;
-const zmin=()=>Math.min(W,H)/2/1700,fit=r=>Math.min(W,H)/2/r*.92;
-function homeView(){camT={x:0,y:0,z:fit(340)}}
+const zmin=()=>Math.min(W,H)/2/(1200*AU/220),fit=r=>Math.min(W,H)/2/r*.92;
+function homeView(){camT={x:0,y:0,z:fit(2.2*AU)}}
 function setCamBtn(){$('pxb-cam').textContent=mode==='free'?'\ud83c\udfa5 Free':mode==='follow'?'\ud83c\udfa5 Follow':'\ud83c\udfac Cinematic';$('pxb-cam').classList.toggle('on',mode!=='free')}
 function zoomAt(px,py,k){const wx=(px-W/2)/cam.z+cam.x,wy=(py-H/2)/cam.z+cam.y;cam.z=cl(cam.z*k,zmin(),70);cam.x=wx-(px-W/2)/cam.z;cam.y=wy-(py-H/2)/cam.z;zT=null;camT=null;if(mode==='cinema'){mode='follow';setCamBtn()}}
 function bodyZoom(b){return cl(Math.min(W,H)*.2/(b.r*(b.id==='saturn'?2.2:1.4)),1.5,40)}
@@ -1282,19 +1388,19 @@ mode=nm;camT=null;setCamBtn();
 $('pxb-in').onclick=()=>zoomAt(W/2,H/2,1.6);
 $('pxb-out').onclick=()=>zoomAt(W/2,H/2,1/1.6);
 $('pxb-home').onclick=()=>{mode='free';focus=null;setCamBtn();homeView()};
-$('pxb-all').onclick=()=>{mode='free';focus=null;setCamBtn();camT={x:0,y:0,z:fit(1500)}};
+$('pxb-all').onclick=()=>{mode='free';focus=null;setCamBtn();camT={x:0,y:0,z:fit(1100*AU/220)}};
 $('pxb-cam').onclick=cycleCam;
 $('pxb-warp').onclick=()=>{warp=WARPS[(WARPS.indexOf(warp)+1)%WARPS.length];$('pxb-warp').textContent='\u23e9 '+warp+'\u00d7';$('pxb-warp').classList.toggle('on',warp>1)};
 $('pxb-lab').onclick=()=>{showL=!showL;$('pxb-lab').classList.toggle('on',showL)};
 $('pxb-orb').onclick=()=>{showO=!showO;$('pxb-orb').classList.toggle('on',showO)};
 $('pxb-fs').onclick=()=>{const st=$('px-stage');if(document.fullscreenElement)document.exitFullscreen();else if(st.requestFullscreen)st.requestFullscreen()};
-$('pxb-go').innerHTML='<option value="">Jump to\u2026</option>'+['sun','mercury','venus','earth','moon','mars','ceres','jupiter','europa','saturn','titan','uranus','neptune','pluto','kuiper','oort'].map(id=>'<option value="'+id+'">'+B[id].name+'</option>').join('');
+$('pxb-go').innerHTML='<option value="">Jump to\u2026</option>'+['sun','mercury','venus','earth','moon','mars','ceres','jupiter','europa','saturn','titan','uranus','neptune','pluto','kuiper','eris','sedna','oort','heliopause','proxima'].map(id=>'<option value="'+id+'">'+B[id].name+'</option>').join('');
 $('pxb-go').onchange=e=>{if(e.target.value)flyToBody(e.target.value,false);e.target.value=''};
 
 /* pointer input */
 const ptrs=new Map();let drag=null,pinchD=0,moved=0;
 const inMini=(x,y)=>Math.hypot(x-(W-70),y-(H-70))<60;
-function miniSet(x,y){const k=1500/58;mode='free';focus=null;camT=null;cam.x=(x-(W-70))*k;cam.y=(y-(H-70))*k;setCamBtn()}
+function miniSet(x,y){const k=(1100*AU/220)/58;mode='free';focus=null;camT=null;cam.x=(x-(W-70))*k;cam.y=(y-(H-70))*k;setCamBtn()}
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});moved=0;
 if(ptrs.size===1){if(inMini(e.offsetX,e.offsetY)){miniDrag=true;miniSet(e.offsetX,e.offsetY);return}drag={x:e.offsetX,y:e.offsetY,cx:cam.x,cy:cam.y}}
 else if(ptrs.size===2){const a=[...ptrs.values()];pinchD=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);drag=null}});
@@ -1353,7 +1459,7 @@ arr.forEach((bk,i)=>{g.fillStyle=cols[i];for(const p of bk){const q=Math.max(p[2
 g.restore();
 }
 function drawOort(c,t){
-const z=cam.z,r0=900*z,r1=1450*z;
+const z=cam.z,r0=280*AU*z,r1=400*AU*z;
 if(r0>Math.max(W,H)*30)return;
 const gr=g.createRadialGradient(c.x,c.y,r0,c.x,c.y,r1);
 gr.addColorStop(0,'rgba(120,170,255,0)');gr.addColorStop(.3,'rgba(130,180,255,.07)');gr.addColorStop(.6,'rgba(150,200,255,.10)');gr.addColorStop(1,'rgba(120,170,255,0)');
@@ -1403,6 +1509,8 @@ if(b.par&&cam.z<.9&&rp<3)return;
 const d=Math.hypot(p.x,p.y)||1,lx=-p.x/d,ly=-p.y/d;
 const col=state.colonies[b.id];
 if(col&&col.owned){const gg=g.createRadialGradient(x,y,rp,x,y,rp*2.6);gg.addColorStop(0,'rgba(255,211,90,.35)');gg.addColorStop(1,'rgba(255,211,90,0)');g.fillStyle=gg;g.beginPath();g.arc(x,y,rp*2.6,0,TAU);g.fill()}
+if(b.type==='boundary'){const bg=g.createRadialGradient(x,y,rp,x,y,rp*5);bg.addColorStop(0,'rgba(120,150,255,.25)');bg.addColorStop(1,'rgba(80,100,200,0)');g.fillStyle=bg;g.beginPath();g.arc(x,y,rp*5,0,TAU);g.fill();g.strokeStyle='rgba(160,180,255,.4)';g.setLineDash([6,8]);g.beginPath();g.arc(x,y,rp*3.5,0,TAU);g.stroke();g.setLineDash([]);}
+if(b.type==='star'&&b.id!=='sun'){const pul=1+.06*Math.sin(t/400);const sg=g.createRadialGradient(x,y,0,x,y,rp*4*pul);sg.addColorStop(0,'rgba(255,100,60,.5)');sg.addColorStop(.4,'rgba(255,60,30,.15)');sg.addColorStop(1,'rgba(200,40,20,0)');g.fillStyle=sg;g.beginPath();g.arc(x,y,rp*4*pul,0,TAU);g.fill();}
 if(b.atm&&rp>3){const ag=g.createRadialGradient(x,y,rp*.9,x,y,rp*1.5);ag.addColorStop(0,b.atm);ag.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=ag;g.beginPath();g.arc(x,y,rp*1.5,0,TAU);g.fill()}
 if(b.type==='comet'){const tl=Math.max(30,rp*10),tg=g.createLinearGradient(x,y,x-lx*tl,y-ly*tl);tg.addColorStop(0,'rgba(200,235,255,.7)');tg.addColorStop(1,'rgba(200,235,255,0)');g.fillStyle=tg;g.beginPath();g.moveTo(x+ly*rp,y-lx*rp);g.lineTo(x-lx*tl,y-ly*tl);g.lineTo(x-ly*rp,y+lx*rp);g.fill();const hg=g.createRadialGradient(x,y,0,x,y,rp*3);hg.addColorStop(0,'rgba(220,245,255,.8)');hg.addColorStop(1,'rgba(220,245,255,0)');g.fillStyle=hg;g.beginPath();g.arc(x,y,rp*3,0,TAU);g.fill()}
 if(b.id==='saturn')ringPass(x,y,rp,false);
@@ -1454,20 +1562,22 @@ g.restore();g.font='700 10px Inter,sans-serif';g.fillStyle=hexA(c,.95);g.textAli
 function drawShip(f,t,isSel,idx){
 if(f.ph==='dead')return;
 const x=sx(f.x),y=sy(f.y);if(x<-80||y<-80||x>W+80||y>H+80)return;
-const c=COL[f.mid]||'#fff',sz=cl(1.25*cam.z,7,24),dsun=Math.hypot(f.x,f.y),hk=cl(1-(dsun-SUNR)/70,0,1);
+const c=COL[f.mid]||'#fff',look=f.look||'sparrow',sz=cl(0.5*cam.z*(look==='atlas'||look==='nova'?1.2:look==='scrap'?0.85:1),3.0,10),dsun=Math.hypot(f.x,f.y),hk=cl(1-(dsun-SUNR)/(HEAT_RADIUS||70),0,1);
 g.save();g.translate(x,y);
 if(hk>0){const hg=g.createRadialGradient(0,0,0,0,0,sz*3);hg.addColorStop(0,'rgba(255,120,40,'+.6*hk+')');hg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=hg;g.beginPath();g.arc(0,0,sz*3,0,TAU);g.fill()}
-g.rotate(f.ang||0);
+g.rotate((f.ang||0)+(f.wobble>0.3?Math.sin(t/90+f.uid)*0.15*f.wobble:0));
+/* heat shimmer */
+if(f.heat>50){g.globalAlpha=0.35*(f.heat/100);g.fillStyle='#ff6a2a';g.beginPath();g.arc(0,0,sz*1.8,0,TAU);g.fill();g.globalAlpha=1;}
 const th=(f.thr||0)+(f.fl>0?1.2:0);
 if(th>0){const fl=sz*(.9+th*.9)*(.85+.3*Math.sin(t/40)),fg=g.createLinearGradient(-sz*.5,0,-sz*.5-fl,0);fg.addColorStop(0,'rgba(255,255,255,.95)');fg.addColorStop(.35,'rgba(255,190,70,.85)');fg.addColorStop(1,'rgba(255,80,20,0)');g.fillStyle=fg;g.beginPath();g.moveTo(-sz*.5,-sz*.22);g.lineTo(-sz*.5-fl,0);g.lineTo(-sz*.5,sz*.22);g.fill()}
 if(f.pan){g.fillStyle='#3f6fd0';g.strokeStyle='#9fc0ff';g.lineWidth=.8;g.fillRect(-sz*.3,sz*.36,sz*.6,sz*.5);g.strokeRect(-sz*.3,sz*.36,sz*.6,sz*.5);g.fillRect(-sz*.3,-sz*.86,sz*.6,sz*.5);g.strokeRect(-sz*.3,-sz*.86,sz*.6,sz*.5)}
-g.fillStyle='#eef2f8';g.strokeStyle=c;g.lineWidth=1.4;g.beginPath();g.moveTo(sz,0);g.lineTo(sz*.25,-sz*.36);g.lineTo(-sz*.55,-sz*.36);g.lineTo(-sz*.55,sz*.36);g.lineTo(sz*.25,sz*.36);g.closePath();g.fill();g.stroke();
+g.fillStyle=look==='scrap'?'#9a9088':look==='aegis'?'#c8d0e0':look==='nova'?'#e8f0ff':look==='atlas'?'#d8dce8':'#eef2f8';g.strokeStyle=look==='scrap'?'#6a6058':c;g.lineWidth=look==='scrap'?1:1.4;g.beginPath();g.moveTo(sz,0);g.lineTo(sz*.25,-sz*.36);g.lineTo(-sz*.55,-sz*.36);g.lineTo(-sz*.55,sz*.36);g.lineTo(sz*.25,sz*.36);g.closePath();g.fill();g.stroke();
 g.fillStyle=c;g.beginPath();g.moveTo(-sz*.2,-sz*.36);g.lineTo(-sz*.7,-sz*.75);g.lineTo(-sz*.55,-sz*.36);g.fill();g.beginPath();g.moveTo(-sz*.2,sz*.36);g.lineTo(-sz*.7,sz*.75);g.lineTo(-sz*.55,sz*.36);g.fill();
 g.fillStyle='#4aa8ff';g.beginPath();g.arc(sz*.2,0,sz*.13,0,TAU);g.fill();
 g.restore();
 if(f.ph==='orbit'&&f.pt>3.5&&f.pt<7){const T=BP[f.tgt];g.save();g.strokeStyle=hexA('#7aff9a',.55+.3*Math.sin(t/90));g.lineWidth=1.4;g.setLineDash([3,3]);g.beginPath();g.moveTo(x,y);g.lineTo(sx(T.x),sy(T.y));g.stroke();g.restore()}
 if(isSel){g.save();g.setLineDash([3,3]);g.strokeStyle='#fff';g.lineWidth=1;g.beginPath();g.arc(x,y,sz+8,t/600,t/600+TAU);g.stroke();g.restore()}
-const nm=f.name,sub=phName(f).toUpperCase()+(f.ph==='cruise'?' '+Math.round(cl(f.s||0,0,1)*100)+'%':'');
+const nm=f.name,hpTxt=f.maxHp?(' HP '+Math.max(0,Math.round(f.hp))+'/'+f.maxHp):'',sub=phName(f).toUpperCase()+(f.ph==='cruise'?' '+Math.round(cl(f.s||0,0,1)*100)+'%':'')+hpTxt+(f.heat>30?' ☀'+Math.round(f.heat)+'%':'');
 g.font='700 11px Inter,Segoe UI,sans-serif';const w1=g.measureText('\ud83d\ude80 '+nm).width;g.font='600 9px Inter,Segoe UI,sans-serif';const w2=g.measureText(sub).width;
 const bw=Math.max(w1,w2)+14,bh=31;let lx=x+sz+12,ly=y-sz-bh-4-(idx%3)*3;lx=cl(lx,4,W-bw-4);ly=cl(ly,40,H-bh-4);
 g.strokeStyle=hexA(c,.7);g.lineWidth=1;g.beginPath();g.moveTo(x+sz*.5,y-sz*.5);g.lineTo(lx,ly+bh);g.stroke();
@@ -1490,7 +1600,7 @@ const cx=W-70,cy=H-70,r=58,ms=r/1500;
 g.save();g.fillStyle='rgba(6,9,20,.78)';g.strokeStyle='rgba(140,160,255,.4)';g.lineWidth=1;g.beginPath();g.arc(cx,cy,r,0,TAU);g.fill();g.stroke();
 g.beginPath();g.arc(cx,cy,r,0,TAU);g.clip();
 g.strokeStyle='rgba(150,175,255,.14)';BL.forEach(b=>{if(b.par)return;g.beginPath();g.arc(cx,cy,b.a*ms,0,TAU);g.stroke()});
-g.fillStyle='rgba(150,200,255,.12)';g.beginPath();g.arc(cx,cy,1420*ms,0,TAU);g.arc(cx,cy,930*ms,0,TAU,true);g.fill();
+g.fillStyle='rgba(150,200,255,.12)';g.beginPath();g.arc(cx,cy,400*AU*ms,0,TAU);g.arc(cx,cy,280*AU*ms,0,TAU,true);g.fill();
 g.fillStyle='#ffcf4d';g.beginPath();g.arc(cx,cy,2.5,0,TAU);g.fill();
 BL.forEach(b=>{if(b.par)return;const p=BP[b.id];g.fillStyle=b.c1;g.fillRect(cx+p.x*ms-1,cy+p.y*ms-1,2.2,2.2)});
 X.fl.forEach(f=>{if(f.ph==='dead')return;g.save();g.translate(cx+f.x*ms,cy+f.y*ms);g.rotate(f.ang||0);g.fillStyle=COL[f.mid]||'#fff';g.beginPath();g.moveTo(5,0);g.lineTo(-3,-3);g.lineTo(-3,3);g.fill();g.restore()});
@@ -1501,7 +1611,7 @@ g.font='600 8px Inter,sans-serif';g.fillStyle='rgba(180,200,255,.7)';g.textAlign
 function drawHUD(t){
 const sc=[.01,.02,.05,.1,.2,.5,1,2,5,10,20];let L=sc[0];for(const v of sc){L=v;if(v*108*cam.z>=70)break}
 const bw=L*108*cam.z;g.strokeStyle='rgba(200,215,255,.8)';g.lineWidth=1.5;g.beginPath();g.moveTo(14,H-18);g.lineTo(14+bw,H-18);g.moveTo(14,H-23);g.lineTo(14,H-13);g.moveTo(14+bw,H-23);g.lineTo(14+bw,H-13);g.stroke();
-g.font='600 10px Inter,sans-serif';g.fillStyle='rgba(200,215,255,.85)';g.fillText(L+' AU',14,H-27);
+g.font='600 10px Inter,sans-serif';g.fillStyle='rgba(200,215,255,.85)';g.fillText(L+' AU  (Earth='+(AU).toFixed(0)+'u)',14,H-27);
 g.textAlign='right';g.fillText('SIM T+ '+fmtT(X.simT)+'   '+warp+'\u00d7   zoom '+cam.z.toFixed(2)+'\u00d7',W-12,H-130);g.textAlign='left';
 if(hover&&mouse.x>=0&&!miniDrag){let nm='',sub='';if(hover.t==='f'){const f=X.fl.find(x=>x.uid===hover.id);if(f){nm=f.name;sub=phName(f)+' \u2192 '+B[f.tgt].name}}else{const b=B[hover.id];nm=b.name;sub=b.type==='star'?'Star':b.type==='moon'?'Moon of '+B[b.par].name:b.type==='dwarf'?'Dwarf planet':b.type==='comet'?'Oort Cloud comet':b.type==='kbo'?'Kuiper Belt object':'Planet'}
 if(nm){g.font='700 11px Inter,sans-serif';const w=Math.max(g.measureText(nm).width,g.measureText(sub).width)+14;const tx=cl(mouse.x+14,4,W-w-4),ty=cl(mouse.y+14,40,H-40);g.fillStyle='rgba(6,10,24,.9)';g.strokeStyle='rgba(140,160,255,.5)';g.beginPath();g.rect(tx,ty,w,32);g.fill();g.stroke();g.fillStyle='#fff';g.fillText(nm,tx+7,ty+13);g.font='500 10px Inter,sans-serif';g.fillStyle='rgba(180,200,255,.8)';g.fillText(sub,tx+7,ty+26)}}
@@ -1521,8 +1631,9 @@ const c={x:sx(0),y:sy(0)};
 drawOort(c,t);
 drawBelt(KUI,.003,['rgba(190,200,230,.55)','rgba(160,175,215,.45)','rgba(210,215,240,.7)'],c,1);
 drawBelt(AST,.017,['rgba(190,170,140,.75)','rgba(150,135,115,.6)','rgba(215,200,170,.85)'],c,1);
-if(showL){g.font='600 10px Inter,sans-serif';g.textAlign='center';g.fillStyle='rgba(170,200,255,.5)';[['OORT CLOUD',-1175],['KUIPER BELT',-640],['ASTEROID BELT',-197]].forEach(a=>{const y=sy(a[1]);if(y>-20&&y<H+20&&c.x>-50&&c.x<W+50)g.fillText(a[0],c.x,y)});g.textAlign='left'}
-if(showO){g.lineWidth=1;for(const b of BL){let cx_,cy_,rr;if(b.par){if(cam.z<2.5)continue;const P=BP[b.par];cx_=sx(P.x);cy_=sy(P.y);rr=b.a*cam.z}else{cx_=c.x;cy_=c.y;rr=b.a*cam.z}
+if(showL){g.font='600 10px Inter,sans-serif';g.textAlign='center';g.fillStyle='rgba(170,200,255,.5)';[['OORT CLOUD',-320*AU],['KUIPER BELT',-45*AU],['ASTEROID BELT',-2.5*AU]].forEach(a=>{const y=sy(a[1]);if(y>-20&&y<H+20&&c.x>-50&&c.x<W+50)g.fillText(a[0],c.x,y)});g.textAlign='left'}
+if(showO){g.lineWidth=1;for(const b of BL){if(b.gWell&&cam.z>0.15){const p=BP[b.id],gx=sx(p.x),gy=sy(p.y),gr=(b.r*6+30)*cam.z;g.strokeStyle='rgba(140,200,255,0.12)';g.beginPath();g.arc(gx,gy,gr,0,TAU);g.stroke();}
+let cx_,cy_,rr;if(b.par){if(cam.z<2.5)continue;const P=BP[b.par];cx_=sx(P.x);cy_=sy(P.y);rr=b.a*cam.z}else{cx_=c.x;cy_=c.y;rr=b.a*cam.z}
 if(rr<5||rr>40000)continue;const hl=sel&&sel.t==='b'&&sel.id===b.id;g.strokeStyle='rgba(150,175,255,'+(hl?.4:.085)+')';g.beginPath();g.arc(cx_,cy_,rr,0,TAU);g.stroke()}}
 drawSun(t);
 for(const b of BL)if(!b.par)drawBody(b,t);
@@ -1561,7 +1672,7 @@ const kv=(a,b)=>'<div class="px-kv"><span>'+a+'</span><span>'+b+'</span></div>';
 if(sel&&sel.t==='b'){const b=B[sel.id];if(b.id!=='sun'){const ref=b.par?B[b.par]:b;h+=kv('Type',b.type==='moon'?'Moon of '+B[b.par].name:b.type==='kbo'?'Kuiper Belt object':b.type==='comet'?'Oort Cloud comet':b.type==='dwarf'?'Dwarf planet':'Planet');h+=kv('Distance from Sun',(ref.a/108).toFixed(2)+' AU (game scale)');h+=kv('Orbital period',b.par?Math.round(b.per)+' s':(b.per/150).toFixed(2)+' yr')}
 const col=state.colonies[b.id];if(col)h+=kv('Colony',col.owned?'Founded \u2014 '+Math.round(col.progress*100)+'% converted':'Not yet founded');
 h+=kv('Ships en route',X.fl.filter(f=>f.tgt===b.id).length);h+=kv('Satellites in orbit',X.sats.filter(s=>s.tgt===b.id).length)}
-else if(sel&&sel.t==='f'){const f=X.fl.find(x=>x.uid===sel.id);if(f){h+='<p style="font-weight:700;margin-bottom:4px">'+f.name+'</p>';h+=kv('Phase',phName(f));h+=kv('Destination',B[f.tgt].name);h+=kv('Progress',Math.round(prog(f)*100)+'%');h+=kv('ETA',fmtT(etaOf(f)/warp));h+=kv('Navigation',(f.fate==='sun'||f.fate==='planet')&&f.ev&1?'\u26a0 ANOMALY':f.ph==='cruise'?'Nominal':'\u2014');h+=kv('Solar arrays',f.pan?'Deployed':'Stowed')}else h='<p class="hint">Flight ended.</p>'}
+else if(sel&&sel.t==='f'){const f=X.fl.find(x=>x.uid===sel.id);if(f){h+='<p style="font-weight:700;margin-bottom:4px">'+f.name+'</p>';h+=kv('Phase',phName(f));h+=kv('Destination',B[f.tgt].name);h+=kv('Progress',Math.round(prog(f)*100)+'%');h+=kv('ETA',fmtT(etaOf(f)/warp));h+=kv('Navigation',(f.fate==='sun'||f.fate==='planet')&&f.ev&1?'\u26a0 ANOMALY':f.ph==='cruise'?'Nominal':'\u2014');h+=kv('Rocket',(f.rocket||'scrap')+(f.maxHp?' · HP '+Math.max(0,Math.round(f.hp))+'/'+f.maxHp:''));h+=kv('Heat',Math.round(f.heat||0)+'%');h+=kv('Solar arrays',f.pan?'Deployed':'Stowed')}else h='<p class="hint">Flight ended.</p>'}
 if(d._h!==h){d._h=h;d.innerHTML=h}
 }
 setInterval(()=>{updFlights();updInfo();if($('panel-mission').classList.contains('active'))renderMissionUI()},250);
@@ -1585,7 +1696,7 @@ pump();
 if(!cv.offsetParent)return;
 const rc=cv.getBoundingClientRect();
 if(Math.abs(rc.width-W)>1||Math.abs(rc.height-H)>1){W=Math.max(200,rc.width);H=Math.max(200,rc.height);dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
-if(!homed){homed=true;cam.z=fit(340)*.9;cam.x=0;cam.y=0;homeView()}
+if(!homed){homed=true;cam.z=fit(2.2*AU)*.9;cam.x=0;cam.y=0;homeView()}
 updCam(dtR);draw(now);
 }
 X.fl.forEach(f=>{TR.set(f.uid,[]);if(f.need)f.wait=true});

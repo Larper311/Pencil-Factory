@@ -28,6 +28,16 @@ button.b{transition:.15s;box-shadow:0 2px 10px #3a63d855}button.b:hover:not(:dis
 .bar i{background:linear-gradient(90deg,#4f8cff,#7ad1ff);box-shadow:0 0 8px #4f8cff}
 #toasts{position:fixed;right:14px;bottom:14px;z-index:30;display:flex;flex-direction:column;gap:6px;max-width:340px}#toasts div{background:#0f1838f2;border:1px solid #4a60b8;border-left:4px solid #7ba3d4;border-radius:8px;padding:8px 12px;font-size:12px;animation:ti .35s ease,to .5s 4.6s forwards;box-shadow:0 6px 22px #000a}@keyframes ti{from{transform:translateX(40px);opacity:0}}@keyframes to{to{opacity:0}}
 #dg{position:fixed;inset:0;background:#000b;z-index:25;display:none;align-items:center;justify-content:center}#dg>div{background:#0f1530;border:1px solid #a8453a;border-radius:12px;padding:20px;max-width:460px}#cl{max-height:560px;overflow:auto;padding-right:4px}
+
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:radial-gradient(1px 1px at 20px 30px,#fff9,transparent),radial-gradient(1.5px 1.5px at 90px 120px,#9fc0ff,transparent),radial-gradient(1px 1px at 160px 60px,#fff8,transparent),radial-gradient(1px 1px at 230px 180px,#ffd9a0,transparent);background-size:260px 220px;animation:dr 120s linear infinite;opacity:.7}@keyframes dr{to{background-position:-1040px 880px}}
+header{backdrop-filter:blur(10px);border-bottom:1px solid #3a63d8aa}header b{background:linear-gradient(90deg,#7ad1ff,#c49bff);-webkit-background-clip:text;color:transparent;font-size:19px;letter-spacing:.5px}.v{text-shadow:0 0 10px #4f8cff88}
+nav{gap:6px;padding:12px 16px}nav button{border-radius:999px;padding:9px 18px;font-weight:600;background:#101734cc;transition:.2s}nav button:hover{border-color:#7ba3d4;transform:translateY(-2px)}nav button.on{background:linear-gradient(135deg,#3a63d8,#8a4fe0);border-color:#9fc0ff;box-shadow:0 0 18px #6a6fe088}
+.card{background:linear-gradient(160deg,#131c40cc,#0a0f28cc);backdrop-filter:blur(6px);border:1px solid #2c3a7a;border-radius:14px}h3{color:#bcd2ff;letter-spacing:.3px}
+button.b{background:linear-gradient(135deg,#3a63d8,#6a4fe0);border-radius:8px;font-weight:600}button.g{background:linear-gradient(135deg,#1f9a62,#2bc07c)}button.r{background:linear-gradient(135deg,#a8453a,#d65a4a)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}.tile{background:linear-gradient(160deg,#16204a,#0d1230);border:1px solid #2c3a7a;border-radius:12px;padding:12px;animation:fi .4s}.tile span{color:#8fa0d8;font-size:12px;display:block}.tile b{font:700 20px monospace;display:block;margin-top:4px}
+.gg{margin:9px 0}.gl{display:flex;justify-content:space-between;font-size:12px;color:#aab8ee}.gb{height:9px;background:#141b3a;border-radius:5px;overflow:hidden;margin-top:3px}.gb i{display:block;height:100%;border-radius:5px;transition:width .5s;background:#4f8cff}.gb i.ok{background:linear-gradient(90deg,#1f9a62,#6fe39a)}.gb i.bad{background:linear-gradient(90deg,#a8453a,#ff8a7a)}.gb i.warn{background:linear-gradient(90deg,#c9962a,#ffd37a)}
+.rk{background:radial-gradient(#1a2552,#070a18);border-radius:12px;padding:8px;border:1px solid #2c3a7a}.fl{transform-box:fill-box;transform-origin:top;animation:fk .12s infinite alternate}@keyframes fk{to{transform:scaleY(1.5)}}
+.chk{margin-top:8px;font-size:13px;line-height:1.6}#ov div{border-radius:16px;box-shadow:0 0 60px #3a63d888}
 </style></head><body>
 <div id="toasts"></div><div id="dg"><div><h3>🛠 Debug console</h3><p class="dim">Test everything without grinding.</p>
 <p><button class="b" onclick="dc(1)">+$1M</button><button class="b" onclick="dc(10)">+$10M</button><button class="b" onclick="dc(100)">+$100M</button><button class="b" onclick="dc(1000)">+$1B</button><button class="b" onclick="dc(100000)">+$100B</button></p>
@@ -49,11 +59,11 @@ button.b{transition:.15s;box-shadow:0 2px 10px #3a63d855}button.b:hover:not(:dis
 const $=id=>document.getElementById(id),R=Math.random,W=a=>{a%=360;return a>180?a-360:a<-180?a+360:a},rn=()=>Math.sqrt(-2*Math.log(R()||1e-9))*Math.cos(6.2832*R());
 const M=x=>Math.abs(x)>=1000?'$'+(x/1000).toFixed(2)+'B':'$'+x.toFixed(2)+'M',F=(x,n=2)=>(+x).toFixed(n);
 const ENG=[
-{id:'hyp',n:'Hypergolic pressure-fed (N2O4/UDMH)',i:[230,285],t:60,m:.15,c:.35,pc:.2,sf:.12,u:null},
-{id:'ker',n:'Kerolox gas-generator (RP-1/LOX)',i:[282,311],t:845,m:.47,c:.8,pc:.04,sf:.09,u:'ker'},
-{id:'met',n:'Methalox full-flow (CH4/LOX)',i:[330,363],t:2300,m:1.6,c:2.5,pc:.05,sf:.1,u:'met'},
-{id:'hyd',n:'Hydrolox staged-combustion (LH2/LOX)',i:[366,452],t:2000,m:3.5,c:6,pc:.09,sf:.15,u:'hyd'},
-{id:'ntr',n:'Nuclear thermal (upper stage only)',i:[0,900],t:0,m:3.5,c:60,pc:.3,sf:.2,u:'ntr'}];
+{id:'hyp',n:'Hypergolic pressure-fed (N2O4/UDMH)',i:[230,285],t:60,m:.15,c:.35,pc:.2,sf:.08,u:null},
+{id:'ker',n:'Kerolox gas-generator (RP-1/LOX)',i:[282,311],t:845,m:.47,c:.8,pc:.04,sf:.055,u:'ker'},
+{id:'met',n:'Methalox full-flow (CH4/LOX)',i:[330,363],t:2300,m:1.6,c:2.5,pc:.05,sf:.06,u:'met'},
+{id:'hyd',n:'Hydrolox staged-combustion (LH2/LOX)',i:[366,452],t:2000,m:3.5,c:6,pc:.09,sf:.09,u:'hyd'},
+{id:'ntr',n:'Nuclear thermal (upper stage only)',i:[0,900],t:0,m:3.5,c:60,pc:.3,sf:.12,u:'ntr'}];
 const TECH=[{id:'ker',n:'Kerolox engines',c:4},{id:'met',n:'Methalox engines',c:25},{id:'hyd',n:'Hydrolox engines',c:45},{id:'ntr',n:'Nuclear thermal upper stage',c:160},{id:'comp',n:'Composite tanks (−20% structure mass)',c:12},{id:'traj',n:'Trajectory optimisation (−0.3 km/s losses)',c:10}];
 const PL={mercury:{n:'Mercury',a:.3871,P:87.97,L:252.25,mu:22032,R:2440,alt:400,col:'#b9a99a'},venus:{n:'Venus',a:.7233,P:224.7,L:181.98,mu:324859,R:6052,alt:300,col:'#f2d58a'},earth:{n:'Earth',a:1,P:365.256,L:100.46,col:'#6fb3ff'},mars:{n:'Mars',a:1.5237,P:686.98,L:355.45,mu:42828,R:3390,alt:300,col:'#ef7d57'},jupiter:{n:'Jupiter',a:5.2029,P:4332.59,L:34.4,mu:126686534,R:69911,g:1,col:'#e3c08f'},saturn:{n:'Saturn',a:9.5367,P:10759.22,L:49.94,mu:37931187,R:58232,g:1,col:'#ecd9a0'},uranus:{n:'Uranus',a:19.189,P:30688.5,L:313.23,mu:5793939,R:25362,g:1,col:'#9be3e8'},neptune:{n:'Neptune',a:30.07,P:60182,L:304.88,mu:6836529,R:24622,g:1,col:'#6c8cff'},pluto:{n:'Pluto',a:39.48,P:90560,L:238.93,mu:869.6,R:1188,alt:300,col:'#f0e3d3'},ceres:{n:'Ceres',a:2.767,P:1681.6,L:249.9,mu:62.6,R:470,alt:200,col:'#cfcac2'}};
 const CON=[
@@ -69,10 +79,10 @@ const SD=[{id:'LNCH',n:'Launchline Services',p:84,mu:.0003,sg:.018,b:1.2,s:'spac
 const NEWS=[['Government boosts space budget','space',.05],['Rival rocket explodes on pad; sector jittery','space',-.06],['Chip shortage hits electronics makers','tech',-.07],['AI boom lifts semiconductor demand','tech',.08],['Defense spending bill passes','def',.05],['Oil price spike','en',.06],['Rare-earth export ban announced','met',.09],['Central bank hikes rates','all',-.04],['Strong GDP report lifts markets','all',.03]];
 let S=null,run=0,speed=2,tab=0,sel=0,sk='',acc=0,last=0;
 const EG=id=>ENG.find(e=>e.id===id),has=e=>!e.u||S.tech[e.u];
-const rel=id=>.55+.44*(1-Math.exp(-(S.tests[id]||0)/14)),relS=()=>.55+.44*(1-Math.exp(-S.sc/12));
+const rel=id=>.72+.27*(1-Math.exp(-(S.tests[id]||0)/10)),relS=()=>.72+.27*(1-Math.exp(-S.sc/8));
 const lon=(p,d)=>(p.L+360*d/p.P)%360,date=d=>new Date(Date.UTC(2000,0,1,12)+d*864e5).toISOString().slice(0,10);
 function newGame(name){const tk=name.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,4)||'OWN';
-S={name,tk,d:10958,cash:10,debt:0,tech:{},tests:{},sc:0,done:{},grounded:0,design:{e1:'hyp',n1:1,p1:5,e2:'hyp',p2:0},mk:0,shock:{},log:[],hold:{},st:{},hist:{},fl:[],news:[]};
+S={name,tk,d:10958,cash:10,debt:0,tech:{},tests:{},sc:0,done:{},grounded:0,design:{e1:'hyp',n1:1,p1:5,e2:'hyp',p2:0,e3:'hyp',p3:0},mk:0,shock:{},log:[],hold:{},st:{},hist:{},fl:[],news:[]};
 SD.forEach(s=>{S.st[s.id]=s.p});S.st[tk]=1;SD.concat([{id:tk}]).forEach(s=>S.hist[s.id]=[]);for(let i=0;i<120;i++)stocks(true);sk=SD[0].id;
 S.log.unshift('Company founded. Payroll runs every day — test cheap, launch small.')}
 function found(){const n=$('nm').value.trim();if(!n)return;newGame(n);run=1;$('rb').textContent='⏸ Pause';$('ov').style.display='none';save();ui()}
@@ -86,11 +96,11 @@ for(const k in S.shock)S.shock[k]*=.85;
 if(!q&&R()<.03){const n=NEWS[Math.floor(R()*NEWS.length)];S.shock[n[1]]=n[2];logm('📰 '+n[0])}}
 function push(id,o,c,sg){const h=S.hist[id];h.push([o,Math.max(o,c)*(1+R()*sg*.5),Math.min(o,c)*(1-R()*sg*.5),c]);if(h.length>150)h.shift()}
 /* ---------- physics ---------- */
-function calc(d,pay){const e1=EG(d.e1),e2=d.p2>0?EG(d.e2):null,k=S.tech.comp?.8:1,g=9.80665;
+function calc(d,pay){const e1=EG(d.e1),e2=d.p2>0?EG(d.e2):null,e3=d.p3>0?EG(d.e3||'hyp'):null,k=S.tech.comp?.8:1,g=9.80665;
 if(d.p1<=0||e1.t<=0)return{bad:'Stage 1 needs propellant and a lift-off engine'};
-const dry1=e1.m*d.n1+e1.sf*k*d.p1,dry2=e2?e2.m+e2.sf*k*d.p2:0,pl=pay/1000,m2=pl+dry2+(e2?d.p2:0),m1=m2+dry1+d.p1;
-const dv1=(e1.i[0]+e1.i[1])/2*g*Math.log(m1/(m2+dry1))/1000,dv2=e2?e2.i[1]*g*Math.log(m2/(pl+dry2))/1000:0;
-return{dv1,dv2,dv:dv1+dv2,m1,twr:e1.t*d.n1/(m1*g),cost:e1.c*d.n1+d.p1*e1.pc+(e2?e2.c+d.p2*e2.pc:0)+.4,rel:rel(e1.id)*(e2?rel(e2.id):1)*.97}}
+const dry1=e1.m*d.n1+e1.sf*k*d.p1,dry2=e2?e2.m+e2.sf*k*d.p2:0,dry3=e3?e3.m+e3.sf*k*d.p3:0,pl=pay/1000,m3=pl+dry3+(e3?d.p3:0),m2=m3+dry2+(e2?d.p2:0),m1=m2+dry1+d.p1;
+const dv1=(e1.i[0]+e1.i[1])/2*g*Math.log(m1/(m2+dry1))/1000,dv2=e2?e2.i[1]*g*Math.log(m2/(m3+dry2))/1000:0,dv3=e3?e3.i[1]*g*Math.log(m3/(pl+dry3))/1000:0;
+return{dv1,dv2,dv3,dv:dv1+dv2+dv3,m1,twr:e1.t*d.n1/(m1*g),cost:e1.c*d.n1+d.p1*e1.pc+(e2?e2.c+d.p2*e2.pc:0)+(e3?e3.c+d.p3*e3.pc:0)+.4,rel:rel(e1.id)*(e2?rel(e2.id):1)*(e3?rel(e3.id):1)*.97}}
 function req(c){let r={dv:0,days:1,pen:0,win:null,note:''};const base=S.tech.traj?9.1:9.4;
 if(c.t=='sub'){r.dv=c.dv;r.days=0}else if(c.t=='leo'){r.dv=base;r.days=0}else if(c.t=='gto'){r.dv=base+2.4}
 else if(c.t=='ism'){const vi=15,rl=6678;r.dv=base+Math.sqrt(vi*vi+2*398600/rl)-Math.sqrt(398600/rl);r.days=5800;r.note='Solar-escape trajectory, v∞ 15 km/s → 150 AU (~16 years)'}else if(c.t=='moon'){r.dv=base+3.13+(c.m=='orbit'?.9:c.m=='land'?2.8:0);r.days=4}
@@ -114,7 +124,7 @@ if(an){S.cash-=e.c;S.tests[id]=n+2;logm('🔥 Static fire ANOMALY on '+e.n.split
 else{S.tests[id]=n+1;logm('✅ Static fire #'+(n+1)+' '+e.n.split(' (')[0]+': Isp '+F(e.i[1]*(1+.02*rn()),0)+' s, chamber pressure nominal.')}ui()}
 function testSc(){if(S.cash<.6)return;S.cash-=.6;if(R()<.15*(1-relS())){S.sc+=2;logm('🧪 Thermal-vac test: solar-array deploy fault found and fixed (+2).')}else{S.sc++;logm('🧪 Spacecraft thermal-vacuum & vibration test passed.')}ui()}
 function loan(x){if(x>0){S.cash+=10;S.debt+=10}else{const p=Math.min(10,S.debt,S.cash);S.cash-=p;S.debt-=p}ui()}
-function setD(k,v){S.design[k]=isNaN(+v)||['e1','e2'].includes(k)?v:Math.max(k=='p2'?0:1,Math.min(k=='n1'?9:5000,+v));ui(1)}
+function setD(k,v){S.design[k]=isNaN(+v)||['e1','e2','e3'].includes(k)?v:Math.max(k=='p2'||k=='p3'?0:1,Math.min(k=='n1'?40:9000,+v));ui(1)}
 function launch(){const c=CON[sel],r=req(c),d=calc(S.design,c.pay);if(d.bad||d.dv<r.dv||d.twr<1.15||S.cash<d.cost||S.grounded>0)return;
 const mult=Math.max(.4,Math.pow(.8,S.done[sel]||0));S.cash-=d.cost;
 const nm=c.n;if(R()>d.rel){S.tests[S.design.e1]=(S.tests[S.design.e1]||0)+3;S.grounded=30;S.shock.space=-.05;S.st[S.tk]*=.88;fxLaunch(0);logm('💥 LAUNCH FAILURE — '+nm+'. Vehicle lost ('+M(d.cost)+'). Regulator investigation: grounded 30 days; lessons learned (+3 tests).');ui();return}
@@ -139,23 +149,34 @@ function ui(f){if(!S)return;$('co').textContent=S.name;$('dt').textContent=date(
 $('nav').innerHTML=['🏢 HQ','🔬 Lab & Tests','🛠 Hangar','🛰 Mission Control','📈 Market'].map((t,i)=>`<button class="${tab==i?'on':''}" onclick="tab=${i};ui()">${t}</button>`).join('');
 document.querySelectorAll('.tab').forEach((e,i)=>e.classList.toggle('on',i==tab));
 if(f||!(tab==2&&$('t2').contains(document.activeElement)))[hq,lab,hang,mc,mkt][tab]()}
-function hq(){$('t0').innerHTML=`<div class="grid"><div class="card"><h3>${S.name} (${S.tk})</h3>
-<div class="row"><span>Daily payroll</span><span>${M(.012+.003*Object.keys(S.tech).length)}</span></div><div class="row"><span>Missions completed</span><span>${Object.values(S.done).reduce((a,b)=>a+b,0)}</span></div>
-<div class="row"><span>Launch status</span><span class="${S.grounded?'bad':'ok'}">${S.grounded?'GROUNDED '+S.grounded+'d':'Cleared'}</span></div><div class="row"><span>Spacecraft maturity</span><span>${F(relS()*100,1)}% reliable</span></div>
-<p><button class="b" onclick="loan(1)">Borrow $10M (8% APR)</button><button class="b r" onclick="loan(0)">Repay $10M</button></p>
-<p class="dim">Run out of money and you go bankrupt. Start: research kerolox, static-fire it, then take small contracts. Deep-space missions need big rockets, tested hardware and the right launch window.</p></div>
-<div class="card"><h3>Log</h3><div class="log">${S.log.slice(0,14).map(x=>'<div>'+x+'</div>').join('')}</div></div></div>`}
+function hq(){const nw=S.cash-S.debt+port(),done=Object.values(S.done).reduce((a,b)=>a+b,0),T=(l,v,c,i)=>`<div class="tile"><span>${i} ${l}</span><b class="${c||''}">${v}</b></div>`,st=(ok,t)=>`<div class="${ok?'ok':'dim'}">${ok?'✔':'○'} ${t}</div>`,te=Object.values(S.tests).reduce((a,b)=>a+b,0);
+$('t0').innerHTML=`<div class="tiles">${T('Cash',M(S.cash),S.cash<1?'bad':'','💰')}${T('Net worth',M(nw),'','📊')}${T('Missions done',done,'ok','🚀')}${T('Tests run',te+S.sc,'','🔥')}${T('Launch status',S.grounded?'GROUNDED '+S.grounded+'d':'CLEARED',S.grounded?'bad':'ok','🛡')}${T('Payroll /day',M(.012+.003*Object.keys(S.tech).length),'warn','👷')}</div>
+<div class="grid"><div class="card"><h3>🧭 Quick start</h3>${st(S.tech.ker,'Lab → research Kerolox engines')}${st((S.tests.ker||0)>=3,'Lab → static-fire Kerolox 3+ times')}${st(Object.keys(S.done).length>0,'Mission Control → pick a contract → ⚡ Auto-build & launch')}${st(S.tech.met||S.tech.hyd,'Reinvest in Methalox / Hydrolox for deep space')}${st(Object.keys(S.hold).length>0,'Market → buy some stocks')}
+<p class="dim">Stuck? Press <b>🛠 Debug</b> in the header for cash and instant unlocks.</p><p><button class="b" onclick="loan(1)">Borrow $10M (8% APR)</button><button class="b r" onclick="loan(0)">Repay $10M</button></p></div>
+<div class="card"><h3>📰 Log</h3><div class="log">${S.log.slice(0,14).map(x=>'<div>'+x+'</div>').join('')}</div></div></div>`}
 function lab(){$('t1').innerHTML=`<div class="grid"><div class="card"><h3>R&D</h3>${TECH.map(t=>`<div class="row"><span>${t.n}</span><span>${S.tech[t.id]?'<span class=ok>✓ done</span>':`<button class="b" ${S.cash<t.c?'disabled':''} onclick="buyTech('${t.id}')">${M(t.c)}</button>`}</span></div>`).join('')}</div>
 <div class="card"><h3>Engine static-fire tests</h3><p class="dim">Reliability rises with test count (diminishing returns). New engines fail often; every test costs 40% of an engine.</p>${ENG.filter(has).map(e=>`<div class="row"><span>${e.n}<br><span class="dim">Isp ${e.i[0]||'–'}/${e.i[1]} s · ${e.t||'vac'} kN · ${S.tests[e.id]||0} tests · ${F(rel(e.id)*100,1)}% reliable</span></span><button class="b" ${S.cash<e.c*.4?'disabled':''} onclick="testEng('${e.id}')">Fire ${M(e.c*.4)}</button></div>`).join('')}
 <div class="row"><span>Spacecraft thermal-vac / vibration<br><span class="dim">${S.sc} tests · ${F(relS()*100,1)}% reliable (needed for deep-space cruise)</span></span><button class="b" onclick="testSc()">Test $0.60M</button></div></div></div>`}
-function hang(){const d=S.design,c=CON[sel],r=calc(d,c.pay),q=req(c),eo=(k,l)=>ENG.filter(e=>has(e)&&(k=='e2'||e.t>0)).map(e=>`<option value="${e.id}" ${d[k]==e.id?'selected':''}>${e.n}</option>`).join('');
-$('t2').innerHTML=`<div class="grid"><div class="card"><h3>Rocket design (payload ${c.pay} kg — ${c.n})</h3>
-<p>Stage 1 <select onchange="setD('e1',this.value)">${eo('e1')}</select> ×<input type="number" value="${d.n1}" style="width:60px" onchange="setD('n1',this.value)"> engines, propellant <input type="number" value="${d.p1}" onchange="setD('p1',this.value)"> t</p>
-<p>Stage 2 <select onchange="setD('e2',this.value)">${eo('e2')}</select> propellant <input type="number" value="${d.p2}" onchange="setD('p2',this.value)"> t <span class="dim">(0 = single stage)</span></p>
-<p class="dim">Contracts pick the payload; select one in Mission Control. Structure fractions and Isp are based on real engine classes.</p></div>
-<div class="card"><h3>Performance</h3>${r.bad?'<p class=bad>'+r.bad+'</p>':`<div class="row"><span>Liftoff mass</span><span>${F(r.m1,1)} t</span></div><div class="row"><span>Stage 1 / 2 Δv</span><span>${F(r.dv1)} / ${F(r.dv2)} km/s</span></div>
-<div class="row"><span>Total Δv (rocket eq.)</span><span class="${r.dv>=q.dv?'ok':'bad'}">${F(r.dv)} km/s</span></div><div class="row"><span>Required Δv (this mission)</span><span>${F(q.dv)} km/s</span></div>
-<div class="row"><span>Liftoff thrust/weight</span><span class="${r.twr>=1.15?'ok':'bad'}">${F(r.twr)}</span></div><div class="row"><span>Build + ops cost</span><span>${M(r.cost)}</span></div><div class="row"><span>Launch success chance</span><span>${F(r.rel*100,1)}%</span></div>`}</div></div>`}
+function gauge(l,pct,txt,cls){return `<div class="gg"><div class="gl"><span>${l}</span><span class="${cls}">${txt}</span></div><div class="gb"><i class="${cls}" style="width:${Math.max(2,Math.min(100,pct))}%"></i></div></div>`}
+function hang(){const d=S.design;d.e3=d.e3||'hyp';d.p3=d.p3||0;const c=CON[sel],r=calc(d,c.pay),q=req(c),eo=k=>ENG.filter(e=>has(e)&&(k!='e1'||e.t>0)).map(e=>`<option value="${e.id}" ${d[k]==e.id?'selected':''}>${e.n}</option>`).join('');
+const h1=30+30*Math.log10(1+d.p1),h2=d.p2>0?16+26*Math.log10(1+d.p2):0,h3=d.p3>0?14+22*Math.log10(1+d.p3):0,fa=26,H=h1+h2+h3+fa+60,w1=34+Math.min(26,d.n1*2),y2=6+fa+h3,y1=y2+h2,yb=y1+h1,nz=Math.min(d.n1,6);
+let noz='';for(let i=0;i<nz;i++){const x=70-w1/2+(i+.5)*w1/nz;noz+=`<polygon points="${x-4},${yb} ${x+4},${yb} ${x+6},${yb+9} ${x-6},${yb+9}" fill="#555"/><polygon class="fl" points="${x-4},${yb+9} ${x+4},${yb+9} ${x},${yb+30+i%2*6}" fill="#ffb347"/>`}
+const svg=`<svg viewBox="0 0 140 ${H}" height="${Math.min(330,H*1.1)}"><defs><linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#aab6d8"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#8a96b8"/></linearGradient></defs><polygon points="70,6 86,${6+fa} 54,${6+fa}" fill="#ff6a5a"/>${h3?`<rect x="58" y="${6+fa}" width="24" height="${h3}" fill="url(#rg)" stroke="#4a5a90"/>`:''}${h2?`<rect x="54" y="${y2}" width="32" height="${h2}" fill="url(#rg)" stroke="#4a5a90"/>`:''}<rect x="${70-w1/2}" y="${y1}" width="${w1}" height="${h1}" fill="url(#rg)" stroke="#4a5a90"/><rect x="${70-w1/2}" y="${y1+h1*.45}" width="${w1}" height="4" fill="#ff6a5a"/>${noz}</svg>`;
+let tips=[];if(!r.bad){if(r.dv<q.dv)tips.push('Not enough Δv — add propellant or a stage 2');if(r.twr<1.15)tips.push('TWR too low — add engines or use a stronger engine');if(S.cash<r.cost)tips.push('Cost exceeds your cash')}else tips.push(r.bad);
+$('t2').innerHTML=`<div class="grid"><div class="card"><h3>🛠 Rocket builder</h3><p class="dim">Target: <b>${c.n}</b> · payload ${c.pay} kg · needs ${F(q.dv)} km/s</p>
+<button class="b g" style="width:100%;padding:10px;font-size:15px" onclick="autoD()">⚡ Auto-design for this mission</button>
+<p class="dim" style="margin:8px 0">…or tune it by hand:</p>
+<p>Stage 1 <select onchange="setD('e1',this.value)">${eo('e1')}</select> × <input type="number" value="${d.n1}" style="width:60px" onchange="setD('n1',this.value)"> engines<br>Propellant <input type="number" value="${d.p1}" onchange="setD('p1',this.value)"> t</p>
+<p>Stage 2 <select onchange="setD('e2',this.value)">${eo('e2')}</select><br>Propellant <input type="number" value="${d.p2}" onchange="setD('p2',this.value)"> t <span class="dim">(0 = skip)</span></p><p>Stage 3 (kick) <select onchange="setD('e3',this.value)">${eo('e3')}</select><br>Propellant <input type="number" value="${d.p3}" onchange="setD('p3',this.value)"> t <span class="dim">(0 = skip)</span></p></div>
+<div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="rk">${svg}</div><div style="flex:1;min-width:180px"><h3>Flight check</h3>${r.bad?'':gauge('Δv',r.dv/q.dv*100,F(r.dv)+' / '+F(q.dv)+' km/s',r.dv>=q.dv?'ok':'bad')+gauge('Lift-off TWR',r.twr/1.15*100,F(r.twr)+' (need 1.15)',r.twr>=1.15?'ok':'bad')+gauge('Reliability',r.rel*100,F(r.rel*100,0)+'%',r.rel>.85?'ok':r.rel>.7?'warn':'bad')+gauge('Cost',r.cost/Math.max(.01,S.cash)*100,M(r.cost)+' of '+M(S.cash),r.cost<=S.cash?'ok':'bad')+`<div class="dim" style="margin-top:6px">Mass ${F(r.m1,1)} t · stage Δv ${F(r.dv1)} + ${F(r.dv2)} + ${F(r.dv3)}</div>`}
+${tips.map(t=>'<p class="warn">⚠ '+t+'</p>').join('')||'<p class="ok">✔ Ready to launch — go to Mission Control</p>'}</div></div></div>`}
+function auto(c){const q=req(c).dv*1.04+.05,e1=['met','ker','hyp'].map(EG).find(has),hi=['hyd','met','ker','hyp'].map(EG).find(has),e3=q>16&&S.tech.ntr?EG('ntr'):hi,pay=c.pay,d={e1:e1.id,e2:e3.id,e3:e3.id,n1:1,p1:5,p2:0,p3:0};
+const bis=(k,f)=>{let lo=.05,hi2=9000;for(let i=0;i<44;i++){const m=Math.sqrt(lo*hi2);d[k]=m;f(calc(d,pay))?lo=m:hi2=m}d[k]=Math.ceil(hi2*10)/10};
+if(q>12)bis('p3',x=>x.dv3<.28*q);if(q>3.2)bis('p2',x=>x.dv2<(q>12?.34:.45)*q);
+for(let n=1;n<=40;n++){d.n1=n;bis('p1',x=>x.dv<q);const x=calc(d,pay);if(x.dv>=q&&x.twr>=1.3)return{...d}}return null}
+function autoD(){const d=auto(CON[sel]);if(!d){toast('⚠ No design possible yet — research better engines in the Lab');return}S.design=d;toast('⚡ Rocket designed');ui(1)}
+function autoLaunch(){const d=auto(CON[sel]);if(!d){toast('⚠ No design possible yet — research better engines in the Lab');return}S.design=d;const c=CON[sel],x=calc(d,c.pay);if(S.cash<x.cost){toast('⚠ Design costs '+M(x.cost)+' — not enough cash');ui(1);return}launch()}
+function checklist(r,d){const row=(ok,t)=>`<div class="${ok?'ok':'bad'}">${ok?'✔':'✘'} ${t}</div>`;if(d.bad)return row(0,d.bad);return row(d.dv>=r.dv,'Δv '+F(d.dv)+' / '+F(r.dv)+' km/s')+row(d.twr>=1.15,'TWR '+F(d.twr)+' (need 1.15)')+row(S.cash>=d.cost,'Cost '+M(d.cost))+row(!S.grounded,S.grounded?'Grounded '+S.grounded+' d':'Cleared for launch')}
 function mc(){const c=CON[sel],r=req(c),d=calc(S.design,c.pay);
 const _s=$('cl').scrollTop,ico={sub:'🛰',leo:'🌍',gto:'📡',moon:'🌕',venus:'🟡',mars:'🔴',mercury:'⚫',ceres:'⚪',jupiter:'🟠',saturn:'🪐',uranus:'🔵',neptune:'🔷',pluto:'🤍',ism:'🌌'};
 $('cl').innerHTML=CON.map((x,i)=>{const q=req(x),dd=calc(S.design,x.pay),can=!dd.bad&&dd.dv>=q.dv;return `<div class="ct ${i==sel?'sel':''}" onclick="sel=${i};ui()"><b>${ico[x.t]||'🚀'} ${x.n}</b> <span class="${can?'ok':'dim'}" style="float:right">${can?'✓ rocket OK':'Δv '+F(q.dv,1)}</span><br><span class="dim">${x.pay} kg · pays ${M(x.rew*Math.max(.4,Math.pow(.8,S.done[i]||0)))}${S.done[i]?' · done ×'+S.done[i]:''}</span></div>`}).join('');$('cl').scrollTop=_s;
@@ -164,7 +185,7 @@ let w='';if(r.at){w=`<div class="row"><span>Hohmann flight time</span><span>${r.
 if(!r.at&&r.note)w+='<p class="dim">'+r.note+'</p>';if(!r.at&&r.days>1)w+='<div class="row"><span>Flight time</span><span>'+r.days+' d ('+F(r.days/365.256,1)+' y)</span></div>';const ok=d.bad?0:d.dv>=r.dv&&d.twr>=1.15&&S.cash>=d.cost&&!S.grounded;
 $('pl').innerHTML=`<b>${c.n}</b><div class="row"><span>Required Δv</span><span>${F(r.dv)} km/s</span></div><div class="row"><span>Your rocket Δv</span><span class="${d.bad||d.dv<r.dv?'bad':'ok'}">${d.bad?'—':F(d.dv)} km/s</span></div>${w}
 <div class="row"><span>Cost / success</span><span>${d.bad?'—':M(d.cost)+' / '+F(d.rel*100,0)+'%'}</span></div>
-<button class="b g" ${ok?'':'disabled'} onclick="launch()">🚀 Launch</button> <span class="dim">${S.grounded?'Grounded after failure':d.bad?'Design a rocket in the Hangar':d.dv<r.dv?'Not enough Δv — see Hangar':d.twr<1.15?'TWR too low':S.cash<d.cost?'Not enough cash':''}</span>`;
+<button class="b g" ${ok?'':'disabled'} onclick="launch()">🚀 Launch</button><button class="b" onclick="autoLaunch()">⚡ Auto-build &amp; launch</button><div class="chk">${checklist(r,d)}</div>`;
 $('fl').innerHTML=S.fl.length?S.fl.map(f=>`<div>${f.name}<div class="bar"><i style="width:${Math.min(100,(S.d-f.t0)/f.T*100)}%"></i></div><span class="dim">arrives ${date(f.t0+f.T)}</span></div>`).join(''):'<p class="dim">None in flight.</p>';drawMap(r,c)}
 function mkt(){const h=S.hist[sk],all=SD.concat([{id:S.tk,n:S.name+' (you)'}]);
 $('t4').innerHTML=`<div class="card"><h3>Markets <span class="dim">15% tax on gains, 0.2% spread</span></h3><div>${all.map(s=>`<button class="b ${sk==s.id?'':'r'}" onclick="sk='${s.id}';ui()">${s.id}</button>`).join('')}</div><canvas id="cd" width="760" height="260" style="margin-top:8px"></canvas></div>
